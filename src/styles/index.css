@@ -1,0 +1,32 @@
+@import "./const.css";
+@import "./navbar.css";
+@import "./login.css";
+@import "./register.css";
+@import "./home.css";
+@import "./header.css";
+@import "./reset.css";
+
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+body {
+  background-color: var(--color-primary);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+

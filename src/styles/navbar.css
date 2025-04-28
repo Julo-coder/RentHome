@@ -1,0 +1,32 @@
+@import "./const.css";
+
+.logreg-site-navbar {
+    padding: 1rem;
+}
+
+.navbar-list {
+    list-style: none;
+    display: flex;
+    justify-content: space-around;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar-list li {
+    margin: 0 1rem;
+}
+
+.navbar-list a {
+    text-decoration: none;
+    color: var(--color-link);
+    font-weight: normal;
+    transition: color 0.3s ease;
+}
+
+.navbar-list a:hover {
+    color: var(--color-link-hoover);
+}
+
+.navbar-list a.active {
+    color: var(--color-btn);
+}

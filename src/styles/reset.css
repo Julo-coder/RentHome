@@ -1,0 +1,81 @@
+.reset-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: var(--color-primary);
+    padding-top: 6rem; /* Add padding to prevent overlap with the fixed header */
+}
+
+.reset-container {
+    background-color: var(--color-secondary);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.reset-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--color-btn);
+    margin-bottom: 1.5rem;
+}
+
+.reset-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.reset-label {
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--color-btn);
+    text-align: left;
+}
+
+.reset-input {
+    padding: 0.75rem;
+    border: 1px solid var(--color-btn);
+    border-radius: 4px;
+    font-size: 1rem;
+    width: 100%;
+}
+
+.reset-button {
+    padding: 0.75rem;
+    background-color: var(--color-btn);
+    color: var(--color-primary);
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.reset-button:hover {
+    background-color: var(--color-btn-hoover);
+}
+
+.reset-text {
+    font-size: 0.9rem;
+    color: var(--color-btn);
+    margin-top: 1rem;
+}
+
+.reset-link {
+    color: var(--color-link);
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.reset-link:hover {
+    color: var(--color-link-hoover);
+}
