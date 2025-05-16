@@ -1,4 +1,3 @@
-
 .register-section {
     width: 100%;
     display: flex;
@@ -18,6 +17,7 @@
     width: 100%;
     max-width: 400px;
     text-align: center;
+    margin-bottom: 20px;
 }
 
 .register-title {
@@ -79,4 +79,143 @@
 
 .register-link:hover {
     color: var(--color-link-hoover);
+}
+
+@media (max-width: 768px) {
+    .register-container {
+        padding: 1.5rem;
+        max-width: 90%; /* Reduce the width for smaller screens */
+    }
+
+    .register-title {
+        font-size: 2rem; /* Adjust font size for smaller screens */
+    }
+
+    .register-form {
+        gap: 0.75rem; /* Reduce the gap between form elements */
+    }
+
+    .register-label {
+        font-size: 0.9rem; /* Adjust label font size */
+    }
+
+    .register-input {
+        padding: 0.5rem; /* Reduce input padding */
+        font-size: 0.9rem; /* Adjust input font size */
+    }
+
+    .register-button {
+        padding: 0.5rem; /* Reduce button padding */
+        font-size: 0.9rem; /* Adjust button font size */
+    }
+
+    .register-text {
+        font-size: 0.8rem; /* Adjust text font size */
+    }
+}
+
+@media (max-width: 480px) {
+    .register-container {
+        padding: 1rem; /* Further reduce padding for very small screens */
+    }
+
+    .register-title {
+        font-size: 1.8rem; /* Further adjust font size */
+    }
+
+    .register-form {
+        gap: 0.5rem; /* Further reduce the gap */
+    }
+
+    .register-input {
+        padding: 0.4rem; /* Further reduce input padding */
+        font-size: 0.8rem; /* Further adjust input font size */
+    }
+
+    .register-button {
+        padding: 0.4rem; /* Further reduce button padding */
+        font-size: 0.8rem; /* Further adjust button font size */
+    }
+
+    .register-text {
+        font-size: 0.7rem; /* Further adjust text font size */
+    }
+}
+
+/* Adjust for 1920x1080 screens */
+@media (max-width: 1920px) and (min-width: 1366px) {
+    .register-container {
+        max-width: 350px; /* Slightly smaller width */
+        padding: 1.8rem; /* Reduce padding */
+    }
+
+    .register-title {
+        font-size: 2.2rem; /* Slightly smaller font size */
+    }
+
+    .register-form {
+        gap: 0.9rem; /* Adjust gap between form elements */
+    }
+
+    .register-input {
+        padding: 0.7rem; /* Adjust input padding */
+        font-size: 0.95rem; /* Slightly smaller font size */
+    }
+
+    .register-button {
+        padding: 0.7rem; /* Adjust button padding */
+        font-size: 0.95rem; /* Slightly smaller font size */
+    }
+}
+
+/* Adjust for 1440p screens */
+@media (min-width: 2560px) and (max-width: 3840px) {
+    .register-container {
+        max-width: 500px; /* Increase width */
+        padding: 2.5rem; /* Increase padding */
+    }
+
+    .register-title {
+        font-size: 3rem; /* Increase font size */
+    }
+
+    .register-form {
+        gap: 1.2rem; /* Increase gap between form elements */
+    }
+
+    .register-input {
+        padding: 1rem; /* Increase input padding */
+        font-size: 1.2rem; /* Increase font size */
+    }
+
+    .register-button {
+        padding: 1rem; /* Increase button padding */
+        font-size: 1.2rem; /* Increase font size */
+    }
+}
+
+/* Adjust for 4K screens */
+@media (min-width: 3840px) {
+    .register-container {
+        max-width: 600px; /* Further increase width */
+        padding: 3rem; /* Further increase padding */
+    }
+
+    .register-title {
+        font-size: 3.5rem; /* Further increase font size */
+    }
+
+    .register-form {
+        gap: 1.5rem; /* Further increase gap between form elements */
+    }
+
+    .register-input {
+        padding: 1.2rem; /* Further increase input padding */
+        font-size: 1.4rem; /* Further increase font size */
+    }
+
+    .register-button {
+        padding: 1.2rem; /* Further increase button padding */
+        font-size: 1.4rem; /* Further increase font size */
+    }
 }
