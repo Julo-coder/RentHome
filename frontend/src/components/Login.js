@@ -17,6 +17,7 @@ export default function Login() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include', // Add this line
                 body: JSON.stringify({ email, password }),
             });
 

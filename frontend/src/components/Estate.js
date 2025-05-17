@@ -1,30 +1,73 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Detales from './Detales';
+import AddEstateModal from './AddEstateModal';
 
 export default function Estate() {
     const [user, setUser] = useState(null);
     const [estates, setEstates] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
+        // Prevent going back
+        window.history.pushState(null, '', window.location.pathname);
+        window.addEventListener('popstate', preventGoBack);
+
         const userData = localStorage.getItem('user');
         if (!userData) {
             navigate('/login');
         } else {
             const user = JSON.parse(userData);
             setUser(user);
-            fetchUserEstates(user.id);
+            fetchUserEstates();
         }
+
+        // Cleanup function
+        return () => {
+            window.removeEventListener('popstate', preventGoBack);
+        };
     }, [navigate]);
 
-    const fetchUserEstates = async (userId) => {
+    const preventGoBack = (e) => {
+        window.history.pushState(null, '', window.location.pathname);
+    };
+
+    const handleLogout = async () => {
         try {
-            const response = await fetch(`http://localhost:8081/estates/${userId}`);
+            const response = await fetch('http://localhost:8081/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                // Remove event listener before logging out
+                window.removeEventListener('popstate', preventGoBack);
+                localStorage.removeItem('user');
+                navigate('/login');
+            } else {
+                console.error('Logout failed');
+            }
+        } catch (error) {
+            console.error('Error during logout:', error);
+        }
+    };
+
+    const fetchUserEstates = async () => {
+        try {
+            const response = await fetch('http://localhost:8081/estates', {
+                credentials: 'include' // Add this line
+            });
+            
             if (!response.ok) {
+                if (response.status === 401) {
+                    navigate('/login');
+                    return;
+                }
                 throw new Error('Failed to fetch estates');
             }
+            
             const data = await response.json();
             setEstates(data);
         } catch (error) {
@@ -34,13 +77,66 @@ export default function Estate() {
         }
     };
 
+    // Funkcja obsługująca dodanie mieszkania po zatwierdzeniu z modalu
+    const handleAddEstate = async (formData) => {
+        try {
+            const response = await fetch('http://localhost:8081/estates', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    ...formData,
+                    max_person: parseInt(formData.max_person),
+                    people: parseInt(formData.people),
+                    area: parseInt(formData.area)
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to add estate');
+            }
+
+            const data = await response.json();
+            console.log('Estate added:', data);
+            fetchUserEstates(); // Refresh the estates list
+        } catch (error) {
+            console.error('Error adding estate:', error);
+        }
+    };
+
     if (loading) {
         return <div>Loading...</div>;
     }
 
+
     return (
         <div className="estate-container">
-            {user && <h2>Welcome, {user.name} {user.surname} {user.phone}</h2>}
+            <div className="header-section">
+                {user && (
+                    <div className="user-info">
+                        <h2>Welcome, {user.name} {user.surname}</h2>
+                        <button 
+                            onClick={handleLogout}
+                            className="logout-button"
+                        >
+                            Logout
+                        </button>
+                        <button 
+                            onClick={() => setIsModalOpen(true)}
+                            className='add-estate-button'
+                        >
+                            Add estate
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            <AddEstateModal 
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSubmit={handleAddEstate}
+            />
+
             <h1>Your Estates</h1>
             <div className="estates-grid">
                 {estates.length === 0 ? (

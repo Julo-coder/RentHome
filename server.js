@@ -3,27 +3,59 @@ const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
+const session = require('express-session');
 
 const saltRounds = 10;
 
 //Create app 
 const app = express();
 app.use(cors({
-    origin: 'http://localhost:3000', // Your React app's URL
+    origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type']
+    allowedHeaders: ['Content-Type'],
+    credentials: true // ciasteczka
 }));
 app.use(express.json());
 
-//Mozliwosc podloczenia wiekszej ilosci ludzi na raz
+//sesja
+app.use(session({
+    secret: 'your_secret_key',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { 
+        secure: false,
+        maxAge: 1000 * 60 * 60 * 24,
+        httpOnly: true,
+        sameSite: 'lax'
+    }
+}));
+
+//odswiezenie i cofniecie strony - sprawdzanie sesji
+app.get('/me', (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ message: "Not logged in" });
+    }
+    res.json(req.session.user);
+});
+
+//wylogowanie
+app.post('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).json({ message: "Logout failed" });
+        }
+        res.status(200).json({ message: "Logged out successfully" });
+    });
+});
+// koniec endpointow dla sesji
 
 const db = mysql.createPool({
     host: "localhost",
     user: "root",
     password: "zaq1@WSX",
     database: "RentHome",
-	waitForConnections: true,
-	connectionLimit: 100,
+    waitForConnections: true,
+    connectionLimit: 100,
 });
 
 (async () => {
@@ -35,7 +67,7 @@ const db = mysql.createPool({
         console.error('Database connection failed:', err);
     }
 })();
-
+//logowanie
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
@@ -55,6 +87,7 @@ app.post('/login', async (req, res) => {
         }
         // Usuń hasło przed wysłaniem danych użytkownika
         delete user.password;
+        req.session.user = user;
         return res.status(200).json({ 
             message: "Login successful", 
             user 
@@ -63,7 +96,7 @@ app.post('/login', async (req, res) => {
         return res.status(500).json({ error: "Database or authentication error" });
     }
 });
-
+//rejestracja
 app.post('/register', async (req, res) => {
     console.log('Received registration request:', req.body);
     
@@ -97,16 +130,47 @@ app.post('/register', async (req, res) => {
     }
 });
 
-app.get('/estates/:userId', async (req, res) => {
-    const userId = req.params.userId;
+//pobranie danych mieszkania
+app.get('/estates', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ message: "Not logged in" });
+    }
+    
     try {
-        const [rows] = await db.promise().query('SELECT * FROM estates WHERE user_id = ?', [userId]);
+        const [rows] = await db.promise().query(
+            'SELECT * FROM estates WHERE user_id = ? ORDER BY id DESC',
+            [req.session.user.id]
+        );
         res.json(rows);
     } catch (err) {
-        res.status(500).json({ error: 'Database query failed' });
+        console.error('Database error:', err);
+        res.status(500).json({ error: 'Error fetching estates' });
+    }
+});
+
+// dodawanie mieszkania
+app.post('/estates', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+    const user_id = req.session.user.id;
+    const { address, max_person, people, area } = req.body;
+
+    if (!address || !max_person || !people || !area) {
+        return res.status(400).json({ message: "All fields are required." });
+    }
+
+    try {
+        const [result] = await db.promise().query(
+            "INSERT INTO estates (user_id, address, max_person, people, area) VALUES (?, ?, ?, ?, ?)",
+            [user_id, address, max_person, people, area]
+        );
+        res.status(201).json({ message: "Estate added successfully", estateId: result.insertId });
+    } catch (err) {
+        res.status(500).json({ message: "Error adding estate", details: err.message });
     }
 });
 
 app.listen(8081, ()=>{
     console.log("listening")
-})
+});
