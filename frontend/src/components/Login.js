@@ -42,7 +42,7 @@ export default function Login() {
 
     return (
         <div className="login-setction">
-            <Header />
+            <Header/>
             <div className="login-container">
                 <h1 className="login-title">Logowanie</h1>
                 {error && <p className="error-message">{error}</p>}

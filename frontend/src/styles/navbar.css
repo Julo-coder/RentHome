@@ -1,32 +1,62 @@
 @import "./const.css";
 
-.logreg-site-navbar {
-    padding: 1rem;
+.navbar {
+    padding: 1rem 2rem;
 }
 
-.navbar-list {
+.nav-list {
     list-style: none;
     display: flex;
-    justify-content: space-around;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1.5rem;
     margin: 0;
     padding: 0;
 }
 
-.navbar-list li {
-    margin: 0 1rem;
-}
-
-.navbar-list a {
+.nav-link {
     text-decoration: none;
-    color: var(--color-link);
-    font-weight: normal;
-    transition: color 0.3s ease;
-}
-
-.navbar-list a:hover {
-    color: var(--color-link-hoover);
-}
-
-.navbar-list a.active {
     color: var(--color-btn);
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+    position: relative;
+}
+
+.nav-link:hover {
+    color: var(--color-primary);
+    background-color: var(--color-btn);
+    transform: translateY(-1px);
+}
+
+.nav-link.active {
+    background-color: var(--color-btn);
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+/* Special styling for action buttons (Logout and Add estate) */
+.nav-link[href="#"] {
+    background-color: var(--color-btn);
+    color: var(--color-primary);
+    border: 1px solid transparent;
+}
+
+.nav-link[href="#"]:hover {
+    background-color: var(--color-btn-hoover);
+    border-color: var(--color-primary);
+}
+
+@media (max-width: 768px) {
+    .nav-list {
+        justify-content: center;
+        gap: 1rem;
+    }
+    
+    .nav-link {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
 }

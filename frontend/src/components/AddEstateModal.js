@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import Modal from 'react-modal';
+import '../styles/modal.css';
 
-Modal.setAppElement('#root'); // Ważne dla dostępności
+Modal.setAppElement('#root');
 
 const AddEstateModal = ({ isOpen, onClose, onSubmit }) => {
     const [formData, setFormData] = useState({
@@ -17,21 +18,65 @@ const AddEstateModal = ({ isOpen, onClose, onSubmit }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSubmit(formData); // Przekazanie danych do funkcji obsługującej
-        onClose(); // Zamknięcie okna
+        onSubmit(formData);
+        setFormData({
+            address: '',
+            max_person: '',
+            people: '',
+            area: ''
+        });
+        onClose();
     };
 
     return (
-        <Modal isOpen={isOpen} onRequestClose={onClose} contentLabel="Dodaj mieszkanie">
-            <h2>Dodaj mieszkanie</h2>
-            <form onSubmit={handleSubmit}>
-                <input type="text" name="address" placeholder="Adres" onChange={handleChange} required />
-                <input type="number" name="max_person" placeholder="Max osób" onChange={handleChange} required />
-                <input type="number" name="people" placeholder="Liczba osób" onChange={handleChange} required />
-                <input type="number" name="area" placeholder="Powierzchnia (m²)" onChange={handleChange} required />
-                <button type="submit">Dodaj</button>
+        <Modal
+            isOpen={isOpen}
+            onRequestClose={onClose}
+            contentLabel="Add Estate"
+        >
+            <h2 className="modal-title">Add New Estate</h2>
+            <form onSubmit={handleSubmit} className="modal-form">
+                <input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    placeholder="Address"
+                    onChange={handleChange}
+                    className="modal-input"
+                    required
+                />
+                <input
+                    type="number"
+                    name="max_person"
+                    value={formData.max_person}
+                    placeholder="Maximum people"
+                    onChange={handleChange}
+                    className="modal-input"
+                    required
+                />
+                <input
+                    type="number"
+                    name="people"
+                    value={formData.people}
+                    placeholder="Current people"
+                    onChange={handleChange}
+                    className="modal-input"
+                    required
+                />
+                <input
+                    type="number"
+                    name="area"
+                    value={formData.area}
+                    placeholder="Area (m²)"
+                    onChange={handleChange}
+                    className="modal-input"
+                    required
+                />
+                <div className="modal-buttons">
+                    <button type="submit" className="modal-submit">Add Estate</button>
+                    <button type="button" onClick={onClose} className="modal-close">Cancel</button>
+                </div>
             </form>
-            <button onClick={onClose}>Zamknij</button>
         </Modal>
     );
 };

@@ -2,11 +2,19 @@ import { NavLink } from "react-router-dom";
 
 export default function Navbar({ items }) {
     return (
-        <nav className="logreg-site-navbar">
-            <ul className="navbar-list">
-                {items.map(({ label, to }) => (
-                    <li key={to}>
-                        <NavLink to={to}>{label}</NavLink>
+        <nav className="navbar">
+            <ul className="nav-list">
+                {items.map((item, index) => (
+                    <li key={index}>
+                        <NavLink
+                            to={item.to}
+                            onClick={item.onClick}
+                            className={({ isActive }) => 
+                                isActive ? "nav-link active" : "nav-link"
+                            }
+                        >
+                            {item.label}
+                        </NavLink>
                     </li>
                 ))}
             </ul>

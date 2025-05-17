@@ -1,0 +1,98 @@
+@import "./const.css";
+
+.ReactModal__Overlay {
+    background-color: rgba(0, 0, 0, 0.75) !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.ReactModal__Content {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    margin: 1.5rem;
+    width: 100%;
+    max-width: 500px;
+    background-color: var(--color-secondary) !important;
+    border-radius: 12px !important;
+    padding: 2rem !important;
+    border: none !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.modal-title {
+    color: var(--color-btn);
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.modal-input {
+    padding: 0.75rem;
+    border: 2px solid var(--color-header);
+    border-radius: 6px;
+    font-size: 1rem;
+    width: 100%;
+    background-color: var(--color-primary);
+    color: var(--color-btn);
+    transition: border-color 0.2s ease;
+}
+
+.modal-input:focus {
+    outline: none;
+    border-color: var(--color-btn);
+}
+
+.modal-input::placeholder {
+    color: var(--color-p);
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.modal-submit {
+    flex: 1;
+    padding: 0.75rem;
+    background-color: var(--color-btn);
+    color: var(--color-primary);
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.modal-close {
+    flex: 1;
+    padding: 0.75rem;
+    background-color: var(--color-header);
+    color: var(--color-btn);
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.modal-submit:hover {
+    background-color: var(--color-btn-hoover);
+}
+
+.modal-close:hover {
+    background-color: var(--color-p);
+}

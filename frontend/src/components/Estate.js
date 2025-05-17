@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Detales from './Detales';
 import AddEstateModal from './AddEstateModal';
+import Header from './Header';
 
 export default function Estate() {
     const [user, setUser] = useState(null);
@@ -105,28 +106,24 @@ export default function Estate() {
     };
 
     if (loading) {
-        return <div>Loading...</div>;
+        return <div className='loading-div'>Loading...</div>;
     }
 
+    const estateNav = [
+        { label: "Dashboard", to: "/estate" },
+        { label: "Profile", to: "/profile" },
+        { label: "Settings", to: "/settings" },
+        { label: "Add estate", to: "#", onClick: () => setIsModalOpen(true) },
+        { label: "Logout", to: "#", onClick: handleLogout }
+    ];
 
     return (
         <div className="estate-container">
+            <Header navItems={estateNav} />
             <div className="header-section">
                 {user && (
                     <div className="user-info">
                         <h2>Welcome, {user.name} {user.surname}</h2>
-                        <button 
-                            onClick={handleLogout}
-                            className="logout-button"
-                        >
-                            Logout
-                        </button>
-                        <button 
-                            onClick={() => setIsModalOpen(true)}
-                            className='add-estate-button'
-                        >
-                            Add estate
-                        </button>
                     </div>
                 )}
             </div>
