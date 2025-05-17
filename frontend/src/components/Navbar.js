@@ -1,13 +1,15 @@
 import { NavLink } from "react-router-dom";
 
-export default function Navbar(){
+export default function Navbar({ items }) {
     return (
         <nav className="logreg-site-navbar">
             <ul className="navbar-list">
-                <li><NavLink to="/">Home</NavLink></li>
-                <li><NavLink to="/register">Rejestracja</NavLink></li>
-                <li><NavLink to="/login">Logowanie</NavLink></li>
+                {items.map(({ label, to }) => (
+                    <li key={to}>
+                        <NavLink to={to}>{label}</NavLink>
+                    </li>
+                ))}
             </ul>
         </nav>
-    )
+    );
 }

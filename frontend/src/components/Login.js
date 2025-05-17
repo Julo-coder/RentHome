@@ -21,16 +21,21 @@ export default function Login() {
             });
 
             const data = await response.json();
+            console.log('Login response:', data); // Debug log
 
             if (response.ok) {
-                // Store user data in localStorage
                 localStorage.setItem('user', JSON.stringify(data.user));
-                navigate('/estate'); // Redirect to estate page
+                navigate('/estate');
             } else {
-                setError(data.message);
+                setError(data.message || 'Login failed. Please check your credentials.');
             }
         } catch (err) {
-            setError('Something went wrong. Please try again.');
+            console.error('Login error:', err); // Debug log
+            if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
+                setError('Unable to connect to server. Please check your connection.');
+            } else {
+                setError('An error occurred. Please try again later.');
+            }
         }
     };
 
