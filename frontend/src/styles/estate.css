@@ -94,7 +94,7 @@
 }
 
 .view-details-btn:hover {
-    background-color: var(--color-btn-hover);
+    background-color: var(--color-btn-hoover);
 }
 
 .loading-div {

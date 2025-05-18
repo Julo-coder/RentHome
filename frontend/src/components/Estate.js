@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Detales from './Detales';
+// import Detales from './Detales';
 import AddEstateModal from './AddEstateModal';
 import Header from './Header';
 
@@ -149,6 +149,7 @@ export default function Estate() {
                             </div>
                             <div className="estate-details">
                                 <p><strong>Address:</strong> {estate.address}</p>
+                                <p><strong>City:</strong> {estate.city}</p>
                                 <p><strong>Area:</strong> {estate.area} m²</p>
                                 <p><strong>Occupancy:</strong> {estate.people} out of {estate.max_person}</p>
                             </div>

@@ -7,8 +7,10 @@ Modal.setAppElement('#root');
 const AddEstateModal = ({ isOpen, onClose, onSubmit }) => {
     const [formData, setFormData] = useState({
         address: '',
-        max_person: '',
+        city: '',
+        postal_code: '',
         people: '',
+        max_person: '',
         area: ''
     });
 
@@ -21,8 +23,10 @@ const AddEstateModal = ({ isOpen, onClose, onSubmit }) => {
         onSubmit(formData);
         setFormData({
             address: '',
-            max_person: '',
+            city: '',
+            postal_code: '',
             people: '',
+            max_person: '',
             area: ''
         });
         onClose();
@@ -46,19 +50,38 @@ const AddEstateModal = ({ isOpen, onClose, onSubmit }) => {
                     required
                 />
                 <input
-                    type="number"
-                    name="max_person"
-                    value={formData.max_person}
-                    placeholder="Maximum people"
+                    type="text"
+                    name="city"
+                    value={formData.city}
+                    placeholder="City"
                     onChange={handleChange}
                     className="modal-input"
                     required
                 />
                 <input
                     type="number"
+                    name="postal_code"
+                    value={formData.postal_code}
+                    placeholder="Postal code"
+                    onChange={handleChange}
+                    className="modal-input"
+                    required
+                />
+
+                <input
+                    type="number"
                     name="people"
                     value={formData.people}
                     placeholder="Current people"
+                    onChange={handleChange}
+                    className="modal-input"
+                    required
+                />
+                <input
+                    type="number"
+                    name="max_person"
+                    value={formData.max_person}
+                    placeholder="Maximum people"
                     onChange={handleChange}
                     className="modal-input"
                     required

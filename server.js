@@ -22,7 +22,7 @@ app.use(session({
     secret: 'your_secret_key',
     resave: false,
     saveUninitialized: true,
-    cookie: { 
+    cookie: {
         secure: false,
         maxAge: 1000 * 60 * 60 * 24,
         httpOnly: true,
@@ -88,9 +88,9 @@ app.post('/login', async (req, res) => {
         // Usuń hasło przed wysłaniem danych użytkownika
         delete user.password;
         req.session.user = user;
-        return res.status(200).json({ 
-            message: "Login successful", 
-            user 
+        return res.status(200).json({
+            message: "Login successful",
+            user
         });
     } catch (err) {
         return res.status(500).json({ error: "Database or authentication error" });
@@ -99,23 +99,23 @@ app.post('/login', async (req, res) => {
 //rejestracja
 app.post('/register', async (req, res) => {
     console.log('Received registration request:', req.body);
-    
+
     const { name, surname, phone, email, password } = req.body;
-    
+
     if (!name || !surname || !phone || !email || !password) {
         return res.status(400).json({ message: "All fields are required" });
     }
-    
+
     try {
         const [result] = await db.promise().query("SELECT * FROM users WHERE email = ?", [email]);
         if (result.length > 0) {
             return res.status(409).json({ message: "User already exists" });
         }
-        
+
         const hashedPassword = await bcrypt.hash(password, saltRounds);
         const values = [name, surname, phone, email, hashedPassword];
         console.log('Attempting to insert user with values:', { ...values, password: '[HIDDEN]' });
-        
+
         const [data] = await db.promise().query(
             "INSERT INTO users (name, surname, phone, email, password) VALUES (?, ?, ?, ?, ?)", values
         );
@@ -123,9 +123,9 @@ app.post('/register', async (req, res) => {
         return res.status(201).json({ message: "User registered successfully" });
     } catch (err) {
         console.error('Registration error:', err);
-        return res.status(500).json({ 
-            message: "Error creating user", 
-            details: err.sqlMessage || err.message 
+        return res.status(500).json({
+            message: "Error creating user",
+            details: err.sqlMessage || err.message
         });
     }
 });
@@ -135,7 +135,7 @@ app.get('/estates', async (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ message: "Not logged in" });
     }
-    
+
     try {
         const [rows] = await db.promise().query(
             'SELECT * FROM estates WHERE user_id = ? ORDER BY id DESC',
@@ -154,23 +154,24 @@ app.post('/estates', async (req, res) => {
         return res.status(401).json({ message: "Unauthorized" });
     }
     const user_id = req.session.user.id;
-    const { address, max_person, people, area } = req.body;
+    const { address, city, postal_code, people, max_person, area } = req.body;
 
-    if (!address || !max_person || !people || !area) {
+    if (!address || !city || !postal_code || !people || !max_person || !area) {
         return res.status(400).json({ message: "All fields are required." });
     }
 
     try {
         const [result] = await db.promise().query(
-            "INSERT INTO estates (user_id, address, max_person, people, area) VALUES (?, ?, ?, ?, ?)",
-            [user_id, address, max_person, people, area]
+            "INSERT INTO estates (user_id, address, city, postal_code, people, max_person, area) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            [user_id, address, city, postal_code, people, max_person, area]  
         );
         res.status(201).json({ message: "Estate added successfully", estateId: result.insertId });
     } catch (err) {
+        console.error('Error adding estate:', err); // Added error logging
         res.status(500).json({ message: "Error adding estate", details: err.message });
     }
 });
 
-app.listen(8081, ()=>{
+app.listen(8081, () => {
     console.log("listening")
 });
