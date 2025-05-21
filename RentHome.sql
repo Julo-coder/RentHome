@@ -27,8 +27,7 @@ create table if not exists tenants(
     contract_number int not null,
     name varchar(50) not null,
     surname varchar(50) not null,
-    phone varchar(15) not null,
-    foreign key (contract_number) references contracts(contract_number)
+    phone varchar(15) not null
 );
 
 
@@ -57,3 +56,4 @@ create table if not exists estate_usage(
     foreign key (estate_id) references estates(id)
 );
 
+alter table tenants add constraint fk_contract_number foreign key (contract_number) references contracts(contract_number);
