@@ -1,7 +1,6 @@
 create database if not exists RentHome;
 use RentHome;
 
---RentHome tables
 create table if not exists users(
     id int auto_increment primary key,
     name varchar(50) not null,
