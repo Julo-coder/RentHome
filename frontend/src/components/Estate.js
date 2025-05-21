@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-// import Detales from './Detales';
+// import Details from './Details';
 import AddEstateModal from './AddEstateModal';
 import Header from './Header';
 

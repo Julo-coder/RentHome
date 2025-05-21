@@ -53,6 +53,7 @@ create table if not exists estate_usage(
     water_usage decimal(10, 2) not null,
     electricity_usage decimal(10, 2) not null,
     gas_usage decimal(10, 2) not null,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     foreign key (estate_id) references estates(id)
 );
 

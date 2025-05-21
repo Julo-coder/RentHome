@@ -11,10 +11,10 @@ const saltRounds = 10;
 const app = express();
 app.use(cors({
     origin: 'http://localhost:3000',
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type'],
-    credentials: true // ciasteczka
-}));
+    credentials: true
+}));;
 app.use(express.json());
 
 //sesja
@@ -171,6 +171,141 @@ app.post('/estates', async (req, res) => {
         res.status(500).json({ message: "Error adding estate", details: err.message });
     }
 });
+
+// Add this new endpoint for fetching estate usage
+app.get('/estate-usage/:estateId', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ message: "Not logged in" });
+    }
+
+    try {
+        const [rows] = await db.promise().query(
+            `SELECT eu.*, e.address 
+             FROM estate_usage eu 
+             JOIN estates e ON eu.estate_id = e.id 
+             WHERE eu.estate_id = ? AND e.user_id = ?`,
+            [req.params.estateId, req.session.user.id]
+        );
+        
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "Usage data not found" });
+        }
+        
+        res.json(rows[0]);
+    } catch (err) {
+        console.error('Database error:', err);
+        res.status(500).json({ error: 'Error fetching estate usage' });
+    }
+});
+
+//wyswietlanie wszystkich nieruchomosci
+app.get('/estates/:id', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ message: "Not logged in" });
+    }
+
+    try {
+        const [rows] = await db.promise().query(
+            'SELECT * FROM estates WHERE id = ? AND user_id = ?',
+            [req.params.id, req.session.user.id]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "Estate not found" });
+        }
+
+        res.json(rows[0]);
+    } catch (err) {
+        console.error('Database error:', err);
+        res.status(500).json({ error: 'Error fetching estate details' });
+    }
+});
+
+// Pobranie szczegółów mieszkania do edycji
+app.get('/estates/edit/:id', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const user_id = req.session.user.id;
+    const estate_id = req.params.id;
+
+    try {
+        const [rows] = await db.promise().query(
+            "SELECT * FROM estates WHERE id = ? AND user_id = ?",
+            [estate_id, user_id]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "Estate not found or unauthorized access." });
+        }
+
+        res.json(rows[0]);
+    } catch (err) {
+        console.error('Error fetching estate:', err);
+        res.status(500).json({ message: "Error fetching estate data", details: err.message });
+    }
+});
+
+// Aktualizacja mieszkania + zwrócenie nowych danych
+app.put('/estates/edit/:id', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const user_id = req.session.user.id;
+    const estate_id = req.params.id;
+    const { address, city, postal_code, people, max_person, area } = req.body;
+
+    if (!address || !city || !postal_code || !people || !max_person || !area) {
+        return res.status(400).json({ message: "All fields are required." });
+    }
+
+    try {
+        await db.promise().query(
+            "UPDATE estates SET address = ?, city = ?, postal_code = ?, people = ?, max_person = ?, area = ? WHERE id = ? AND user_id = ?",
+            [address, city, postal_code, people, max_person, area, estate_id, user_id]
+        );
+
+        const [updatedEstate] = await db.promise().query(
+            "SELECT * FROM estates WHERE id = ? AND user_id = ?",
+            [estate_id, user_id]
+        );
+
+        res.status(200).json(updatedEstate[0]); // Zwracamy nowe dane
+    } catch (err) {
+        console.error('Error updating estate:', err);
+        res.status(500).json({ message: "Error updating estate", details: err.message });
+    }
+});
+
+//dodawania zużycia
+app.post('/estate-usage', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const { estate_id, water_usage, electricity_usage, gas_usage, date_of_measure } = req.body;
+
+
+    if (!estate_id || !date_of_measure || water_usage === undefined || electricity_usage === undefined || gas_usage === undefined) {
+        return res.status(400).json({ message: "All fields are required." });
+    }
+
+    try {
+        await db.promise().query(
+            "INSERT INTO estate_usage (estate_id, date_of_measure, water_usage, electricity_usage, gas_usage) VALUES (?, ?, ?, ?, ?)",
+            [estate_id, date_of_measure, parseFloat(water_usage), parseFloat(electricity_usage), parseFloat(gas_usage)]
+        );
+
+        res.status(201).json({ message: "Usage data added successfully." });
+    } catch (err) {
+        console.error('Error adding usage data:', err);
+        res.status(500).json({ message: "Error adding usage data", details: err.message });
+    }
+});
+
+
 
 app.listen(8081, () => {
     console.log("listening")

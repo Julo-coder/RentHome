@@ -6,6 +6,8 @@
 @import "./header.css";
 @import "./reset.css";
 @import "./estate.css";
+@import "./details.css";
+@import "./modal.css";
 
 * {
   margin: 0;
