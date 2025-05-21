@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 // import Detales from './Detales';
 import AddEstateModal from './AddEstateModal';
@@ -10,6 +10,30 @@ export default function Estate() {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const navigate = useNavigate();
+
+    // Move fetchUserEstates definition before useEffect and wrap in useCallback
+    const fetchUserEstates = useCallback(async () => {
+        try {
+            const response = await fetch('http://localhost:8081/estates', {
+                credentials: 'include'
+            });
+            
+            if (!response.ok) {
+                if (response.status === 401) {
+                    navigate('/login');
+                    return;
+                }
+                throw new Error('Failed to fetch estates');
+            }
+            
+            const data = await response.json();
+            setEstates(data);
+        } catch (error) {
+            console.error('Error fetching estates:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [navigate]); // Include navigate in dependencies
 
     useEffect(() => {
         // Prevent going back
@@ -29,7 +53,7 @@ export default function Estate() {
         return () => {
             window.removeEventListener('popstate', preventGoBack);
         };
-    }, [navigate]);
+    }, [navigate, fetchUserEstates]); // Add fetchUserEstates to dependencies
 
     const preventGoBack = (e) => {
         window.history.pushState(null, '', window.location.pathname);
@@ -52,29 +76,6 @@ export default function Estate() {
             }
         } catch (error) {
             console.error('Error during logout:', error);
-        }
-    };
-
-    const fetchUserEstates = async () => {
-        try {
-            const response = await fetch('http://localhost:8081/estates', {
-                credentials: 'include' // Add this line
-            });
-            
-            if (!response.ok) {
-                if (response.status === 401) {
-                    navigate('/login');
-                    return;
-                }
-                throw new Error('Failed to fetch estates');
-            }
-            
-            const data = await response.json();
-            setEstates(data);
-        } catch (error) {
-            console.error('Error fetching estates:', error);
-        } finally {
-            setLoading(false);
         }
     };
 
