@@ -247,7 +247,7 @@ app.get('/estates/edit/:id', async (req, res) => {
     }
 });
 
-// Aktualizacja mieszkania + zwrócenie nowych danych
+//Edytowanie danych mieszkania
 app.put('/estates/edit/:id', async (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ message: "Unauthorized" });
@@ -281,27 +281,38 @@ app.put('/estates/edit/:id', async (req, res) => {
 
 //dodawania zużycia
 app.post('/estate-usage', async (req, res) => {
+    console.log('Received data:', req.body);
+    
     if (!req.session.user) {
         return res.status(401).json({ message: "Unauthorized" });
     }
 
     const { estate_id, water_usage, electricity_usage, gas_usage, date_of_measure } = req.body;
 
-
-    if (!estate_id || !date_of_measure || water_usage === undefined || electricity_usage === undefined || gas_usage === undefined) {
-        return res.status(400).json({ message: "All fields are required." });
-    }
-
+    // Validate estate ownership
     try {
-        await db.promise().query(
-            "INSERT INTO estate_usage (estate_id, date_of_measure, water_usage, electricity_usage, gas_usage) VALUES (?, ?, ?, ?, ?)",
-            [estate_id, date_of_measure, parseFloat(water_usage), parseFloat(electricity_usage), parseFloat(gas_usage)]
+        const [estate] = await db.promise().query(
+            "SELECT id FROM estates WHERE id = ? AND user_id = ?",
+            [estate_id, req.session.user.id]
         );
 
-        res.status(201).json({ message: "Usage data added successfully." });
+        if (estate.length === 0) {
+            return res.status(403).json({ message: "Estate not found or unauthorized access" });
+        }
+
+        // Proceed with insertion
+        await db.promise().query(
+            "INSERT INTO estate_usage (estate_id, water_usage, electricity_usage, gas_usage, created_at) VALUES (?, ?, ?, ?, ?)",
+            [estate_id, parseFloat(water_usage), parseFloat(electricity_usage), parseFloat(gas_usage), created_at]
+        );
+
+        res.status(201).json({ message: "Usage data added successfully" });
     } catch (err) {
         console.error('Error adding usage data:', err);
-        res.status(500).json({ message: "Error adding usage data", details: err.message });
+        res.status(500).json({ 
+            message: "Error adding usage data", 
+            details: err.message 
+        });
     }
 });
 

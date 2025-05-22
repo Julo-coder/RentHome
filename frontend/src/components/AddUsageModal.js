@@ -9,17 +9,13 @@ const AddUsageModal = ({ isOpen, onClose, estateId, onUpdate }) => {
         water_usage: '',
         electricity_usage: '',
         gas_usage: '',
-        create_at: new Date().toISOString().split('T')[0] // Initialize with current date
+        created_at: new Date().toISOString().split('T')[0]
     });
     const [error, setError] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleSubmit = async (e) => {
@@ -28,17 +24,27 @@ const AddUsageModal = ({ isOpen, onClose, estateId, onUpdate }) => {
         setError(null);
 
         try {
-            const response = await fetch(`http://localhost:8081/estate-usage/${estateId}`, {
+            // Log the data being sent
+            console.log('Sending data:', {
+                estate_id: estateId,
+                water_usage: formData.water_usage,
+                electricity_usage: formData.electricity_usage,
+                gas_usage: formData.gas_usage,
+                created_at: formData.created_at
+            });
+
+            const response = await fetch('http://localhost:8081/estate-usage', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 credentials: 'include',
                 body: JSON.stringify({
-                    ...formData,
+                    estate_id: parseInt(estateId), // Convert to number
                     water_usage: parseFloat(formData.water_usage) || 0,
                     electricity_usage: parseFloat(formData.electricity_usage) || 0,
-                    gas_usage: parseFloat(formData.gas_usage) || 0
+                    gas_usage: parseFloat(formData.gas_usage) || 0,
+                    created_at: formData.created_at
                 })
             });
 
@@ -47,11 +53,13 @@ const AddUsageModal = ({ isOpen, onClose, estateId, onUpdate }) => {
                 throw new Error(errorData.message || 'Failed to add usage data');
             }
 
+            const data = await response.json();
+            console.log('Success:', data);
             onClose();
             onUpdate && onUpdate();
-        } catch (err) {
-            console.error('Error adding usage data:', err);
-            setError(err.message || 'Failed to add usage data. Please try again.');
+        } catch (error) {
+            console.error('Error details:', error);
+            setError(error.message || 'Failed to add usage data');
         } finally {
             setIsSubmitting(false);
         }
@@ -61,17 +69,17 @@ const AddUsageModal = ({ isOpen, onClose, estateId, onUpdate }) => {
         <Modal
             isOpen={isOpen}
             onRequestClose={onClose}
-            contentLabel="Add Usage Data"
+            contentLabel="Add Usage"
             className="ReactModal__Content"
             overlayClassName="ReactModal__Overlay"
         >
-            <h2 className="modal-title">Add New Usage Data</h2>
+            <h2 className="modal-title">Add Usage Data</h2>
             {error && <div className="error-message">{error}</div>}
             <form onSubmit={handleSubmit} className="modal-form">
                 <input
                     type="date"
-                    name="date"
-                    value={formData.date}
+                    name="created_at"
+                    value={formData.createcd_at}
                     onChange={handleChange}
                     className="modal-input"
                     required
@@ -80,8 +88,8 @@ const AddUsageModal = ({ isOpen, onClose, estateId, onUpdate }) => {
                     type="number"
                     name="water_usage"
                     value={formData.water_usage}
-                    onChange={handleChange}
                     placeholder="Water Usage (m³)"
+                    onChange={handleChange}
                     className="modal-input"
                     step="0.01"
                     min="0"
@@ -91,8 +99,8 @@ const AddUsageModal = ({ isOpen, onClose, estateId, onUpdate }) => {
                     type="number"
                     name="electricity_usage"
                     value={formData.electricity_usage}
-                    onChange={handleChange}
                     placeholder="Electricity Usage (kWh)"
+                    onChange={handleChange}
                     className="modal-input"
                     step="0.01"
                     min="0"
@@ -102,8 +110,8 @@ const AddUsageModal = ({ isOpen, onClose, estateId, onUpdate }) => {
                     type="number"
                     name="gas_usage"
                     value={formData.gas_usage}
-                    onChange={handleChange}
                     placeholder="Gas Usage (m³)"
+                    onChange={handleChange}
                     className="modal-input"
                     step="0.01"
                     min="0"
