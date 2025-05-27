@@ -151,3 +151,29 @@
     font-size: 1.8rem;
     margin-bottom: 2rem;
 }
+
+.usage-charts {
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: var(--color-secondary);
+    border-radius: 8px;
+}
+
+.chart-container {
+    position: relative;
+    height: 400px;
+    width: 100%;
+}
+
+.chart-controls {
+    margin-bottom: 1rem;
+}
+
+.chart-select {
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid var(--color-btn);
+    background-color: white;
+    color: var(--color-text);
+    font-size: 1rem;
+}

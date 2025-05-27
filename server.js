@@ -316,36 +316,32 @@ app.post('/estate-usage', async (req, res) => {
     }
 });
 
-// Get latest usage data for an estate
-// app.get('/estate-usage/:id', async (req, res) => {
-//     if (!req.session.user) {
-//         return res.status(401).json({ message: "Unauthorized" });
-//     }
+// Add this new endpoint for usage history
+app.get('/estate-usage/:id/history', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
 
-//     try {
-//         const [rows] = await db.promise().query(
-//             `SELECT eu.*, e.address 
-//              FROM estate_usage eu 
-//              JOIN estates e ON eu.estate_id = e.id 
-//              WHERE eu.estate_id = ? AND e.user_id = ? 
-//              ORDER BY eu.date_of_measure DESC, eu.created_at DESC 
-//              LIMIT 1`,
-//             [req.params.id, req.session.user.id]
-//         );
+    try {
+        const [rows] = await db.promise().query(
+            `SELECT eu.water_usage, eu.electricity_usage, eu.gas_usage, eu.date_of_measure 
+             FROM estate_usage eu 
+             JOIN estates e ON eu.estate_id = e.id 
+             WHERE eu.estate_id = ? AND e.user_id = ? 
+             ORDER BY eu.date_of_measure ASC`,
+            [req.params.id, req.session.user.id]
+        );
 
-//         if (rows.length === 0) {
-//             return res.status(404).json({ message: "Usage data not found" });
-//         }
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "No historical data found" });
+        }
 
-//         res.json(rows[0]);
-//     } catch (err) {
-//         console.error('Database error:', err);
-//         res.status(500).json({ 
-//             message: "Error fetching usage data",
-//             details: err.message 
-//         });
-//     }
-// });
+        res.json(rows);
+    } catch (err) {
+        console.error('Error fetching usage history:', err);
+        res.status(500).json({ message: "Error fetching usage history" });
+    }
+});
 
 app.listen(8081, () => {
     console.log("listening")

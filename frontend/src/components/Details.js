@@ -3,12 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Header from './Header';
 import EditEstateModal from './EditEstateModal';
 import AddUsageModal from './AddUsageModal';
+import UsageCharts from './UsageCharts';
 
 export default function Details() {
     const [estate, setEstate] = useState(null);
     const [usage, setUsage] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [usageHistory, setUsageHistory] = useState([]);
     const { estateId } = useParams();
     const navigate = useNavigate();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -16,11 +18,14 @@ export default function Details() {
 
     const fetchEstateDetails = useCallback(async () => {
         try {
-            const [estateResponse, usageResponse] = await Promise.all([
+            const [estateResponse, usageResponse, historyResponse] = await Promise.all([
                 fetch(`http://localhost:8081/estates/${estateId}`, {
                     credentials: 'include'
                 }),
                 fetch(`http://localhost:8081/estate-usage/${estateId}`, {
+                    credentials: 'include'
+                }),
+                fetch(`http://localhost:8081/estate-usage/${estateId}/history`, {
                     credentials: 'include'
                 })
             ]);
@@ -39,10 +44,17 @@ export default function Details() {
             if (usageResponse.ok) {
                 const usageData = await usageResponse.json();
                 setUsage(usageData);
-            } else if (usageResponse.status !== 404) {
-                // Only throw error if it's not a "not found" response
-                console.error('Usage fetch error:', await usageResponse.json());
+                console.log('Usage data:', usageData);
             }
+
+            if (historyResponse.ok) {
+                const historyData = await historyResponse.json();
+                setUsageHistory(historyData);
+                console.log('History data:', historyData);
+            } else {
+                console.error('History response not ok:', await historyResponse.json());
+            }
+
         } catch (error) {
             console.error('Error:', error);
             setError(error.message);
@@ -106,6 +118,7 @@ export default function Details() {
                                     <p>{usage.gas_usage} m³</p>
                                 </div>
                             </div>
+                            <UsageCharts usageData={usageHistory} />
                         </div>
                     )}
                 </div>
