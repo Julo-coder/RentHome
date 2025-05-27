@@ -45,6 +45,8 @@ create table if not exists contracts(
 create table if not exists estate_equipments(
     estate_id int not null,
     estate_equipment varchar(50) not null,
+    quantity int not null,
+    equipment_condition varchar(20) not null,
     foreign key (estate_id) references estates(id)
 );
 

@@ -4,6 +4,8 @@ import Header from './Header';
 import EditEstateModal from './EditEstateModal';
 import AddUsageModal from './AddUsageModal';
 import UsageCharts from './UsageCharts';
+import AddEquipmentModal from './AddEquipmentModal';
+import EqList from './EqList';
 
 export default function Details() {
     const [estate, setEstate] = useState(null);
@@ -15,6 +17,8 @@ export default function Details() {
     const navigate = useNavigate();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isAddUsageModalOpen, setIsAddUsageModalOpen] = useState(false);
+    const [isAddEquipmentModalOpen, setIsAddEquipmentModalOpen] = useState(false);
+    const [isEquipmentListOpen, setIsEquipmentListOpen] = useState(false);
 
     const fetchEstateDetails = useCallback(async () => {
         try {
@@ -82,7 +86,8 @@ export default function Details() {
     const detailsNav = [
         { label: "Back to Estates", to: "/estate" },
         { label: "Edit Estate", to: "#", onClick: handleEditEstate },
-        { label: "Add Usage", to: "#", onClick: () => setIsAddUsageModalOpen(true) }
+        { label: "Add Usage", to: "#", onClick: () => setIsAddUsageModalOpen(true) },
+        { label: "Add Equipment", to: "#", onClick: () => setIsAddEquipmentModalOpen(true) }
     ];
 
     return (
@@ -93,7 +98,15 @@ export default function Details() {
                 <h2>Estate Details</h2>
                 <div className="details-grid">
                     <div className="info-section">
-                        <h3>Basic Information</h3>
+                        <div className="info-header">
+                            <h3>Basic Information</h3>
+                            <button 
+                                onClick={() => setIsEquipmentListOpen(true)}
+                                className="show-equipment-btn"
+                            >
+                                Show Equipment
+                            </button>
+                        </div>
                         <p><strong>Address:</strong> {estate.address}</p>
                         <p><strong>City:</strong> {estate.city}</p>
                         <p><strong>Postal Code:</strong> {estate.postal_code}</p>
@@ -124,6 +137,12 @@ export default function Details() {
                 </div>
             </div>
 
+            <EqList
+                isOpen={isEquipmentListOpen}
+                onClose={() => setIsEquipmentListOpen(false)}
+                estateId={estateId}
+            />
+
             <EditEstateModal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
@@ -134,6 +153,13 @@ export default function Details() {
             <AddUsageModal
                 isOpen={isAddUsageModalOpen}
                 onClose={() => setIsAddUsageModalOpen(false)}
+                onUpdate={fetchEstateDetails}
+                estateId={estateId}
+            />
+
+            <AddEquipmentModal
+                isOpen={isAddEquipmentModalOpen}
+                onClose={() => setIsAddEquipmentModalOpen(false)}
                 onUpdate={fetchEstateDetails}
                 estateId={estateId}
             />

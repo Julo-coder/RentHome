@@ -343,6 +343,61 @@ app.get('/estate-usage/:id/history', async (req, res) => {
     }
 });
 
+// Add this endpoint after your other endpoints
+app.post('/estate-equipment', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const { estate_id, estate_equipment, quantity, equipment_condition } = req.body;
+
+    try {
+        const [estate] = await db.promise().query(
+            "SELECT id FROM estates WHERE id = ? AND user_id = ?",
+            [estate_id, req.session.user.id]
+        );
+
+        if (estate.length === 0) {
+            return res.status(403).json({ message: "Estate not found or unauthorized access" });
+        }
+
+        await db.promise().query(
+            "INSERT INTO estate_equipments (estate_id, estate_equipment, quantity, equipment_condition) VALUES (?, ?, ?, ?)",
+            [estate_id, estate_equipment, quantity, equipment_condition]
+        );
+
+        res.status(201).json({ message: "Equipment added successfully" });
+    } catch (err) {
+        console.error('Error adding equipment:', err);
+        res.status(500).json({ 
+            message: "Error adding equipment", 
+            details: err.message 
+        });
+    }
+});
+
+// New endpoint for fetching equipment by estate ID
+app.get('/estate-equipment/:id', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+        const [rows] = await db.promise().query(
+            `SELECT ee.* 
+             FROM estate_equipments ee 
+             JOIN estates e ON ee.estate_id = e.id 
+             WHERE ee.estate_id = ? AND e.user_id = ?`,
+            [req.params.id, req.session.user.id]
+        );
+
+        res.json(rows);
+    } catch (err) {
+        console.error('Error fetching equipment:', err);
+        res.status(500).json({ message: "Error fetching equipment" });
+    }
+});
+
 app.listen(8081, () => {
     console.log("listening")
 });

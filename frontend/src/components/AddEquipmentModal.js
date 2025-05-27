@@ -4,12 +4,11 @@ import '../styles/modal.css';
 
 Modal.setAppElement('#root');
 
-const AddUsageModal = ({ isOpen, onClose, estateId, onUpdate }) => {
+const AddEquipmentModal = ({ isOpen, onClose, estateId, onUpdate }) => {
     const [formData, setFormData] = useState({
-        water_usage: '',
-        electricity_usage: '',
-        gas_usage: '',
-        date_of_measure: new Date().toISOString().split('T')[0]
+        estate_equipment: '',
+        quantity: '',
+        equipment_condition: 'good' // default value
     });
     const [error, setError] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,7 +25,7 @@ const AddUsageModal = ({ isOpen, onClose, estateId, onUpdate }) => {
         setSuccessMessage('');
 
         try {
-            const response = await fetch('http://localhost:8081/estate-usage', {
+            const response = await fetch('http://localhost:8081/estate-equipment', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -34,25 +33,31 @@ const AddUsageModal = ({ isOpen, onClose, estateId, onUpdate }) => {
                 credentials: 'include',
                 body: JSON.stringify({
                     estate_id: parseInt(estateId),
-                    water_usage: parseFloat(formData.water_usage) || 0,
-                    electricity_usage: parseFloat(formData.electricity_usage) || 0,
-                    gas_usage: parseFloat(formData.gas_usage) || 0,
-                    date_of_measure: formData.date_of_measure
+                    estate_equipment: formData.estate_equipment,
+                    quantity: parseInt(formData.quantity),
+                    equipment_condition: formData.equipment_condition
                 })
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to add usage data');
+                throw new Error(errorData.message || 'Failed to add equipment');
             }
 
             await response.json();
-            setSuccessMessage('Usage data added successfully!');
+            setSuccessMessage('Equipment added successfully!');
             
-            // Immediately update the parent component
+            // Clear form fields
+            setFormData({
+                estate_equipment: '',
+                quantity: '',
+                equipment_condition: 'good' // Reset to default value
+            });
+            
             if (onUpdate) {
                 await onUpdate();
             }
+
 
         } catch (error) {
             console.error('Error details:', error);
@@ -66,60 +71,50 @@ const AddUsageModal = ({ isOpen, onClose, estateId, onUpdate }) => {
         <Modal
             isOpen={isOpen}
             onRequestClose={onClose}
-            contentLabel="Add Usage"
+            contentLabel="Add Equipment"
         >
-            <h2 className="modal-title">Add Usage Data</h2>
+            <h2 className="modal-title">Add Equipment</h2>
             {error && <div className="error-message">{error}</div>}
             {successMessage && <div className="success-message">{successMessage}</div>}
             <form onSubmit={handleSubmit} className="modal-form">
                 <input
-                    type="date"
-                    name="date_of_measure"
-                    value={formData.date_of_measure}
+                    type="text"
+                    name="estate_equipment"
+                    value={formData.estate_equipment}
+                    placeholder="Equipment Name"
                     onChange={handleChange}
                     className="modal-input"
                     required
                 />
                 <input
                     type="number"
-                    name="water_usage"
-                    value={formData.water_usage}
-                    placeholder="Water Usage (m³)"
+                    name="quantity"
+                    value={formData.quantity}
+                    placeholder="Quantity"
                     onChange={handleChange}
                     className="modal-input"
-                    step="0.01"
-                    min="0"
+                    min="1"
                     required
                 />
-                <input
-                    type="number"
-                    name="electricity_usage"
-                    value={formData.electricity_usage}
-                    placeholder="Electricity Usage (kWh)"
+                <select
+                    name="equipment_condition"
+                    value={formData.equipment_condition}
                     onChange={handleChange}
                     className="modal-input"
-                    step="0.01"
-                    min="0"
                     required
-                />
-                <input
-                    type="number"
-                    name="gas_usage"
-                    value={formData.gas_usage}
-                    placeholder="Gas Usage (m³)"
-                    onChange={handleChange}
-                    className="modal-input"
-                    step="0.01"
-                    min="0"
-                    required
-                />
+                >
+                    <option value="new">New</option>
+                    <option value="good">Good</option>
+                    <option value="fair">Fair</option>
+                    <option value="poor">Poor</option>
+                </select>
                 <div className="modal-buttons">
                     <button 
                         type="submit" 
                         className="modal-submit"
                         disabled={isSubmitting}
                     >
-                        {isSubmitting ? 'Adding...' : 'Add Usage'}
+                        {isSubmitting ? 'Adding...' : 'Add Equipment'}
                     </button>
                     <button 
                         type="button" 
@@ -135,4 +130,4 @@ const AddUsageModal = ({ isOpen, onClose, estateId, onUpdate }) => {
     );
 };
 
-export default AddUsageModal;
+export default AddEquipmentModal;

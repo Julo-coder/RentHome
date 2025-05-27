@@ -8,6 +8,7 @@
 @import "./estate.css";
 @import "./details.css";
 @import "./modal.css";
+@import "./profile.css";
 
 * {
   margin: 0;

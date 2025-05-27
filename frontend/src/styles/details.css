@@ -1,19 +1,20 @@
 .details-container {
-    padding: 12vh 2rem 2rem 2rem; /* Changed top padding to account for fixed header */
+    padding: 12vh 2rem 2rem 2rem;
     max-width: 1200px;
     margin: 0 auto;
-    min-height: 100vh;
+    min-height: calc(100vh - 10vh); /* Subtract main header height */
     display: grid;
     grid-template-rows: auto auto 1fr;
     gap: 4rem;
+    overflow-y: auto;
 }
 
 .details-header {
     position: fixed;
-    top: 10vh; /* Position below main header */
+    top: 10vh;
     left: 0;
     width: 100%;
-    z-index: 900; /* Below main header z-index */
+    z-index: 900;
     background-color: var(--color-secondary);
     padding: 1rem 2rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -60,12 +61,13 @@
 }
 
 .estate-details-card {
-    margin-top: 8vh;
+    margin-top: 8vh; /* Space for details header */
     background-color: var(--color-secondary);
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     width: 100%;
     padding: 2rem;
+    overflow-y: auto;
 }
 
 .estate-details-card > h2 {
@@ -157,11 +159,12 @@
     padding: 1rem;
     background-color: var(--color-secondary);
     border-radius: 8px;
+    overflow-x: hidden;
 }
 
 .chart-container {
     position: relative;
-    height: 400px;
+    min-height: 400px;
     width: 100%;
 }
 
@@ -176,4 +179,49 @@
     background-color: white;
     color: var(--color-text);
     font-size: 1rem;
+}
+
+.info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.show-equipment-btn {
+    padding: 0.5rem 1rem;
+    background-color: var(--color-btn);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.show-equipment-btn:hover {
+    background-color: var(--color-btn-hoover);
+}
+
+.equipment-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.equipment-table th,
+.equipment-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.equipment-table th {
+    background-color: var(--color-secondary);
+    font-weight: 500;
+    color: var(--color-btn);
+}
+
+.equipment-table tr:hover {
+    background-color: var(--color-background);
 }

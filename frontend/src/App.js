@@ -5,6 +5,7 @@ import Register from "./components/Register";
 import Reset from "./components/Reset";
 import Estate from "./components/Estate";
 import Details from "./components/Details";
+import Profile from "./components/Profile";
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
       <Route path="/reset" element={<Reset />} />
       <Route path="/estate" element={<Estate />} />
       <Route path="/estate-details/:estateId" element={<Details />} />
+      <Route path="/profile/:userId" element={<Profile />} />
     </Routes>
   );
 }
