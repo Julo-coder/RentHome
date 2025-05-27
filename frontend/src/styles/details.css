@@ -1,34 +1,153 @@
 .details-container {
-    padding: 2rem;
+    padding: 12vh 2rem 2rem 2rem; /* Changed top padding to account for fixed header */
     max-width: 1200px;
     margin: 0 auto;
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    gap: 4rem;
 }
 
-.usage-stats {
-    margin-top: 2rem;
+.details-header {
+    position: fixed;
+    top: 10vh; /* Position below main header */
+    left: 0;
+    width: 100%;
+    z-index: 900; /* Below main header z-index */
+    background-color: var(--color-secondary);
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.details-header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.header-button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.button-primary {
+    background-color: var(--color-btn);
+    color: white;
+}
+
+.button-primary:hover {
+    background-color: var(--color-btn-hoover);
+}
+
+.button-secondary {
+    background-color: var(--color-background);
+    color: var(--color-btn);
+}
+
+.button-secondary:hover {
+    background-color: var(--color-p);
+}
+
+.estate-details-card {
+    margin-top: 8vh;
+    background-color: var(--color-secondary);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    padding: 2rem;
+}
+
+.estate-details-card > h2 {
+    color: var(--color-btn);
+    font-size: 2rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--color-btn);
+}
+
+.details-grid {
+    display: grid;
+    grid-template-rows: auto auto;
+    gap: 4rem; /* Increased gap */
+    padding: 2rem;
+}
+
+.info-section {
+    display: grid;
+    gap: 1rem;
+}
+
+.info-section h3 {
+    color: var(--color-btn);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.info-section p {
+    font-size: 1.1rem;
+    color: var(--color-text);
+}
+
+.usage-section {
+    width: 100%;
 }
 
 .usage-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
-    margin-top: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Reduced from 250px */
+    gap: 1.5rem; /* Reduced from 2rem */
+    width: 100%;
 }
 
 .usage-card {
-    background-color: var(--color-secondary);
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: transparent; /* Removed background */
+    padding: 1rem; /* Reduced from 1.5rem */
+    box-shadow: none; /* Removed box shadow */
+    display: grid;
+    gap: 0.25rem; /* Reduced from 0.5rem */
 }
 
-.usage-card h3 {
+.usage-card h4 {
     color: var(--color-btn);
-    margin-bottom: 1rem;
+    font-size: 1rem; /* Reduced from 1.2rem */
+    margin-bottom: 0.25rem;
 }
 
 .usage-card p {
-    font-size: 1.5rem;
+    font-size: 1.5rem; /* Reduced from 1.8rem */
     font-weight: bold;
     color: var(--color-text);
+}
+
+.basic-info {
+    margin-top: 2rem;
+}
+
+.basic-info h2 {
+    color: var(--color-btn);
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+
+.utility-usage {
+    margin-top: 2rem;
+}
+
+.utility-usage h2 {
+    color: var(--color-btn);
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
 }

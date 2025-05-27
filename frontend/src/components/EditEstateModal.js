@@ -99,8 +99,6 @@ const EditEstateModal = ({ isOpen, onClose, estateId, onUpdate }) => {
             isOpen={isOpen}
             onRequestClose={onClose}
             contentLabel="Edit Estate"
-            className="modal-content"
-            overlayClassName="modal-overlay"
         >
             <h2 className="modal-title">Edit Estate</h2>
             {error && <div className="error-message">{error}</div>}

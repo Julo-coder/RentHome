@@ -9,10 +9,11 @@ const AddUsageModal = ({ isOpen, onClose, estateId, onUpdate }) => {
         water_usage: '',
         electricity_usage: '',
         gas_usage: '',
-        created_at: new Date().toISOString().split('T')[0]
+        date_of_measure: new Date().toISOString().split('T')[0]
     });
     const [error, setError] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -22,17 +23,9 @@ const AddUsageModal = ({ isOpen, onClose, estateId, onUpdate }) => {
         e.preventDefault();
         setIsSubmitting(true);
         setError(null);
+        setSuccessMessage('');
 
         try {
-            // Log the data being sent
-            console.log('Sending data:', {
-                estate_id: estateId,
-                water_usage: formData.water_usage,
-                electricity_usage: formData.electricity_usage,
-                gas_usage: formData.gas_usage,
-                created_at: formData.created_at
-            });
-
             const response = await fetch('http://localhost:8081/estate-usage', {
                 method: 'POST',
                 headers: {
@@ -40,11 +33,11 @@ const AddUsageModal = ({ isOpen, onClose, estateId, onUpdate }) => {
                 },
                 credentials: 'include',
                 body: JSON.stringify({
-                    estate_id: parseInt(estateId), // Convert to number
+                    estate_id: parseInt(estateId),
                     water_usage: parseFloat(formData.water_usage) || 0,
                     electricity_usage: parseFloat(formData.electricity_usage) || 0,
                     gas_usage: parseFloat(formData.gas_usage) || 0,
-                    created_at: formData.created_at
+                    date_of_measure: formData.date_of_measure
                 })
             });
 
@@ -53,13 +46,22 @@ const AddUsageModal = ({ isOpen, onClose, estateId, onUpdate }) => {
                 throw new Error(errorData.message || 'Failed to add usage data');
             }
 
-            const data = await response.json();
-            console.log('Success:', data);
-            onClose();
-            onUpdate && onUpdate();
+            await response.json();
+            setSuccessMessage('Usage data added successfully!');
+            
+            // Immediately update the parent component
+            if (onUpdate) {
+                await onUpdate();
+            }
+
+            setTimeout(() => {
+                onClose();
+                setSuccessMessage('');
+            }, 1500);
+
         } catch (error) {
             console.error('Error details:', error);
-            setError(error.message || 'Failed to add usage data');
+            setError(error.message);
         } finally {
             setIsSubmitting(false);
         }
@@ -70,16 +72,15 @@ const AddUsageModal = ({ isOpen, onClose, estateId, onUpdate }) => {
             isOpen={isOpen}
             onRequestClose={onClose}
             contentLabel="Add Usage"
-            className="ReactModal__Content"
-            overlayClassName="ReactModal__Overlay"
         >
             <h2 className="modal-title">Add Usage Data</h2>
             {error && <div className="error-message">{error}</div>}
+            {successMessage && <div className="success-message">{successMessage}</div>}
             <form onSubmit={handleSubmit} className="modal-form">
                 <input
                     type="date"
-                    name="created_at"
-                    value={formData.createcd_at}
+                    name="date_of_measure"
+                    value={formData.date_of_measure}
                     onChange={handleChange}
                     className="modal-input"
                     required

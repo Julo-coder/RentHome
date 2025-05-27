@@ -48,13 +48,17 @@ create table if not exists estate_equipments(
     foreign key (estate_id) references estates(id)
 );
 
-create table if not exists estate_usage(
+create table if not exists estate_usage (
+    id int auto_increment primary key,
     estate_id int not null,
     water_usage decimal(10, 2) not null,
     electricity_usage decimal(10, 2) not null,
     gas_usage decimal(10, 2) not null,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    date_of_measure date not null,
+    created_at timestamp default current_timestamp,
     foreign key (estate_id) references estates(id)
 );
+
+
 
 alter table tenants add constraint fk_contract_number foreign key (contract_number) references contracts(contract_number);

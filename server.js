@@ -183,7 +183,9 @@ app.get('/estate-usage/:estateId', async (req, res) => {
             `SELECT eu.*, e.address 
              FROM estate_usage eu 
              JOIN estates e ON eu.estate_id = e.id 
-             WHERE eu.estate_id = ? AND e.user_id = ?`,
+             WHERE eu.estate_id = ? AND e.user_id = ? 
+             ORDER BY eu.date_of_measure DESC, eu.created_at DESC 
+             LIMIT 1`,
             [req.params.estateId, req.session.user.id]
         );
         
@@ -289,7 +291,6 @@ app.post('/estate-usage', async (req, res) => {
 
     const { estate_id, water_usage, electricity_usage, gas_usage, date_of_measure } = req.body;
 
-    // Validate estate ownership
     try {
         const [estate] = await db.promise().query(
             "SELECT id FROM estates WHERE id = ? AND user_id = ?",
@@ -300,10 +301,9 @@ app.post('/estate-usage', async (req, res) => {
             return res.status(403).json({ message: "Estate not found or unauthorized access" });
         }
 
-        // Proceed with insertion
         await db.promise().query(
-            "INSERT INTO estate_usage (estate_id, water_usage, electricity_usage, gas_usage, created_at) VALUES (?, ?, ?, ?, ?)",
-            [estate_id, parseFloat(water_usage), parseFloat(electricity_usage), parseFloat(gas_usage), created_at]
+            "INSERT INTO estate_usage (estate_id, water_usage, electricity_usage, gas_usage, date_of_measure) VALUES (?, ?, ?, ?, ?)",
+            [estate_id, parseFloat(water_usage), parseFloat(electricity_usage), parseFloat(gas_usage), date_of_measure]
         );
 
         res.status(201).json({ message: "Usage data added successfully" });
@@ -316,7 +316,36 @@ app.post('/estate-usage', async (req, res) => {
     }
 });
 
+// Get latest usage data for an estate
+// app.get('/estate-usage/:id', async (req, res) => {
+//     if (!req.session.user) {
+//         return res.status(401).json({ message: "Unauthorized" });
+//     }
 
+//     try {
+//         const [rows] = await db.promise().query(
+//             `SELECT eu.*, e.address 
+//              FROM estate_usage eu 
+//              JOIN estates e ON eu.estate_id = e.id 
+//              WHERE eu.estate_id = ? AND e.user_id = ? 
+//              ORDER BY eu.date_of_measure DESC, eu.created_at DESC 
+//              LIMIT 1`,
+//             [req.params.id, req.session.user.id]
+//         );
+
+//         if (rows.length === 0) {
+//             return res.status(404).json({ message: "Usage data not found" });
+//         }
+
+//         res.json(rows[0]);
+//     } catch (err) {
+//         console.error('Database error:', err);
+//         res.status(500).json({ 
+//             message: "Error fetching usage data",
+//             details: err.message 
+//         });
+//     }
+// });
 
 app.listen(8081, () => {
     console.log("listening")

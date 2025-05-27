@@ -25,21 +25,24 @@ export default function Details() {
                 })
             ]);
 
-            if (!estateResponse.ok || !usageResponse.ok) {
-                if (estateResponse.status === 401 || usageResponse.status === 401) {
+            if (!estateResponse.ok) {
+                if (estateResponse.status === 401) {
                     navigate('/login');
                     return;
                 }
                 throw new Error('Failed to fetch estate details');
             }
 
-            const [estateData, usageData] = await Promise.all([
-                estateResponse.json(),
-                usageResponse.json()
-            ]);
-
+            const estateData = await estateResponse.json();
             setEstate(estateData);
-            setUsage(usageData);
+
+            if (usageResponse.ok) {
+                const usageData = await usageResponse.json();
+                setUsage(usageData);
+            } else if (usageResponse.status !== 404) {
+                // Only throw error if it's not a "not found" response
+                console.error('Usage fetch error:', await usageResponse.json());
+            }
         } catch (error) {
             console.error('Error:', error);
             setError(error.message);
