@@ -398,6 +398,192 @@ app.get('/estate-equipment/:id', async (req, res) => {
     }
 });
 
+// Add this before app.listen(8081...)
+
+app.get('/user/stats/:userId', async (req, res) => {
+    if (!req.session.user || req.session.user.id !== parseInt(req.params.userId)) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+        // Get total estates and average area
+        const [estatesQuery] = await db.promise().query(
+            `SELECT 
+                COUNT(*) as total,
+                SUM(people) as totalTenants,
+                AVG(area) as averageArea,
+                AVG((people / max_person) * 100) as occupancyRate
+             FROM estates 
+             WHERE user_id = ?`,
+            [req.params.userId]
+        );
+
+        // Get contracts and financial information
+        const [contractsQuery] = await db.promise().query(
+            `SELECT 
+                COUNT(*) as total,
+                SUM(rental_price) as monthlyIncome,
+                AVG(rental_price) as averageRent,
+                SUM(charges) as monthlyCharges
+             FROM contracts c
+             JOIN estates e ON c.estate_id = e.id
+             WHERE e.user_id = ?`,
+            [req.params.userId]
+        );
+
+        // Get average utility usage
+        const [usageQuery] = await db.promise().query(
+            `SELECT 
+                AVG(eu.water_usage) as avgWater,
+                AVG(eu.electricity_usage) as avgElectricity,
+                AVG(eu.gas_usage) as avgGas
+             FROM estate_usage eu
+             JOIN estates e ON eu.estate_id = e.id
+             WHERE e.user_id = ?
+             GROUP BY e.user_id`,
+            [req.params.userId]
+        );
+
+        // Combine and format the data
+        const stats = {
+            estates: {
+                total: estatesQuery[0].total || 0,
+                totalTenants: estatesQuery[0].totalTenants || 0,
+                averageArea: Math.round(estatesQuery[0].averageArea || 0),
+                occupancyRate: Math.round(estatesQuery[0].occupancyRate || 0)
+            },
+            contracts: {
+                total: contractsQuery[0].total || 0,
+                monthlyIncome: Math.round(contractsQuery[0].monthlyIncome || 0),
+                averageRent: Math.round(contractsQuery[0].averageRent || 0),
+                monthlyCharges: Math.round(contractsQuery[0].monthlyCharges || 0)
+            },
+            usage: {
+                avgWater: Math.round(usageQuery[0]?.avgWater || 0),
+                avgElectricity: Math.round(usageQuery[0]?.avgElectricity || 0),
+                avgGas: Math.round(usageQuery[0]?.avgGas || 0)
+            }
+        };
+
+        res.json(stats);
+    } catch (err) {
+        console.error('Error fetching user stats:', err);
+        res.status(500).json({ 
+            message: "Error fetching statistics",
+            details: err.message 
+        });
+    }
+});
+
+// Add these endpoints before app.listen(8081...)
+
+// Get all tenants
+app.get('/tenants', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+        const [rows] = await db.promise().query(
+            "SELECT * FROM tenants"
+        );
+        res.json(rows);
+    } catch (err) {
+        console.error('Error fetching tenants:', err);
+        res.status(500).json({ message: "Error fetching tenants" });
+    }
+});
+
+// Get estates for specific user
+app.get('/estates/user/:userId', async (req, res) => {
+    if (!req.session.user || req.session.user.id !== parseInt(req.params.userId)) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+        const [rows] = await db.promise().query(
+            "SELECT * FROM estates WHERE user_id = ?",
+            [req.params.userId]
+        );
+        res.json(rows);
+    } catch (err) {
+        console.error('Error fetching estates:', err);
+        res.status(500).json({ message: "Error fetching estates" });
+    }
+});
+
+// Create new contract
+app.post('/contracts', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const { estate_id, tenant_id, rental_price, charges, rent } = req.body;
+
+    try {
+        // First verify that the estate belongs to the logged-in user
+        const [estate] = await db.promise().query(
+            "SELECT id FROM estates WHERE id = ? AND user_id = ?",
+            [estate_id, req.session.user.id]
+        );
+
+        if (estate.length === 0) {
+            return res.status(403).json({ message: "Estate not found or unauthorized access" });
+        }
+
+        // Generate contract number (timestamp + random number)
+        const contract_number = Date.now() + Math.floor(Math.random() * 1000);
+
+        // Insert the contract
+        await db.promise().query(
+            `INSERT INTO contracts 
+            (contract_number, estate_id, tenant_id, rental_price, charges, rent) 
+            VALUES (?, ?, ?, ?, ?, ?)`,
+            [contract_number, estate_id, tenant_id, rental_price, charges, rent]
+        );
+
+        // Update estate occupancy
+        await db.promise().query(
+            "UPDATE estates SET people = people + 1 WHERE id = ?",
+            [estate_id]
+        );
+
+        res.status(201).json({ 
+            message: "Contract created successfully",
+            contract_number: contract_number
+        });
+    } catch (err) {
+        console.error('Error creating contract:', err);
+        res.status(500).json({ 
+            message: "Error creating contract",
+            details: err.message 
+        });
+    }
+});
+
+// Get contracts for an estate
+app.get('/contracts/estate/:estateId', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+        const [rows] = await db.promise().query(
+            `SELECT c.*, t.name, t.surname 
+             FROM contracts c
+             JOIN tenants t ON c.tenant_id = t.id
+             JOIN estates e ON c.estate_id = e.id
+             WHERE c.estate_id = ? AND e.user_id = ?
+             ORDER BY c.contract_number DESC`,
+            [req.params.estateId, req.session.user.id]
+        );
+        res.json(rows);
+    } catch (err) {
+        console.error('Error fetching contracts:', err);
+        res.status(500).json({ message: "Error fetching contracts" });
+    }
+});
+
 app.listen(8081, () => {
     console.log("listening")
 });

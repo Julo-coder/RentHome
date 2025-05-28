@@ -14,7 +14,17 @@ const AddEstateModal = ({ isOpen, onClose, onSubmit }) => {
     });
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        if (e.target.name === 'postal_code') {
+            const value = e.target.value.replace(/[^0-9]/g, '');
+            if (value.length <= 5) {
+                const formattedValue = value.length > 2 
+                    ? `${value.slice(0,2)}-${value.slice(2)}` 
+                    : value;
+                setFormData({ ...formData, postal_code: formattedValue });
+            }
+        } else {
+            setFormData({ ...formData, [e.target.name]: e.target.value });
+        }
     };
 
     const handleSubmit = (e) => {
@@ -58,12 +68,14 @@ const AddEstateModal = ({ isOpen, onClose, onSubmit }) => {
                     required
                 />
                 <input
-                    type="number"
+                    type="text"
                     name="postal_code"
                     value={formData.postal_code}
-                    placeholder="Postal code"
+                    placeholder="Postal code (XX-XXX)"
                     onChange={handleChange}
                     className="modal-input"
+                    pattern="[0-9]{2}-[0-9]{3}"
+                    maxLength="6"
                     required
                 />
 

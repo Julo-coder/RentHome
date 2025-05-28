@@ -111,7 +111,7 @@ export default function Estate() {
 
     const estateNav = [
         { label: "Dashboard", to: "/estate" },
-        { label: "Profile", to: "/profile" },
+        { label: "Profile", to: `/profile/${user?.id}` }, // Updated profile link
         { label: "Settings", to: "/settings" },
         { label: "Add estate", to: "#", onClick: () => setIsModalOpen(true) },
         { label: "Logout", to: "#", onClick: handleLogout }

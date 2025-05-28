@@ -1,66 +1,95 @@
-create database if not exists RentHome;
-use RentHome;
+-- Drop database if exists and create new one
+DROP DATABASE IF EXISTS RentHome;
+CREATE DATABASE RentHome;
+USE RentHome;
 
-create table if not exists users(
-    id int auto_increment primary key,
-    name varchar(50) not null,
-    surname varchar(50) not null,
-    phone varchar(15) not null,
-    email varchar(50) not null,
-    password varchar(255) not null
+-- Drop tables if they exist (in correct order)
+DROP TABLE IF EXISTS estate_usage;
+DROP TABLE IF EXISTS estate_equipments;
+DROP TABLE IF EXISTS contracts;
+DROP TABLE IF EXISTS tenants;
+DROP TABLE IF EXISTS estates;
+DROP TABLE IF EXISTS users;
+
+-- Create tables in correct order
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    surname VARCHAR(50) NOT NULL,
+    phone VARCHAR(15) NOT NULL,
+    email VARCHAR(50) NOT NULL,
+    password VARCHAR(255) NOT NULL
 );
 
-create table if not exists estates(
-    id int auto_increment primary key,
-    user_id int not null,
-    address varchar(80) not null,
-    city varchar(50) not null,
-    postal_code varchar(10) not null,
-    people int not null,
-    max_person int not null,
-    area decimal(10, 2) not null,
-    foreign key (user_id) references users(id)
+CREATE TABLE IF NOT EXISTS estates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    address VARCHAR(80) NOT NULL,
+    city VARCHAR(50) NOT NULL,
+    postal_code VARCHAR(10) NOT NULL,
+    people INT NOT NULL,
+    max_person INT NOT NULL,
+    area DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-create table if not exists tenants(
-    id int auto_increment primary key,
-    contract_number int not null,
-    name varchar(50) not null,
-    surname varchar(50) not null,
-    phone varchar(15) not null
+CREATE TABLE IF NOT EXISTS tenants (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    surname VARCHAR(50) NOT NULL,
+    phone VARCHAR(15) NOT NULL
 );
 
-
-create table if not exists contracts(
-    contract_number int primary key,
-    estate_id int not null,
-    tenant_id int not null,
-    rental_price decimal(10, 2) not null,
-    rent int not null,
-    charges decimal(10, 2) not null,
-    foreign key (estate_id) references estates(id),
-    foreign key (tenant_id) references tenants(id)
+CREATE TABLE IF NOT EXISTS contracts (
+    contract_number INT PRIMARY KEY,
+    estate_id INT NOT NULL,
+    tenant_id INT NOT NULL,
+    rental_price DECIMAL(10, 2) NOT NULL,
+    rent INT NOT NULL,
+    charges DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (estate_id) REFERENCES estates(id),
+    FOREIGN KEY (tenant_id) REFERENCES tenants(id)
 );
 
-create table if not exists estate_equipments(
-    estate_id int not null,
-    estate_equipment varchar(50) not null,
-    quantity int not null,
-    equipment_condition varchar(20) not null,
-    foreign key (estate_id) references estates(id)
+-- Create other tables
+CREATE TABLE IF NOT EXISTS estate_equipments (
+    estate_id INT NOT NULL,
+    estate_equipment VARCHAR(50) NOT NULL,
+    quantity INT NOT NULL,
+    equipment_condition VARCHAR(20) NOT NULL,
+    FOREIGN KEY (estate_id) REFERENCES estates(id)
 );
 
-create table if not exists estate_usage (
-    id int auto_increment primary key,
-    estate_id int not null,
-    water_usage decimal(10, 2) not null,
-    electricity_usage decimal(10, 2) not null,
-    gas_usage decimal(10, 2) not null,
-    date_of_measure date not null,
-    created_at timestamp default current_timestamp,
-    foreign key (estate_id) references estates(id)
+CREATE TABLE IF NOT EXISTS estate_usage (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    estate_id INT NOT NULL,
+    water_usage DECIMAL(10, 2) NOT NULL,
+    electricity_usage DECIMAL(10, 2) NOT NULL,
+    gas_usage DECIMAL(10, 2) NOT NULL,
+    date_of_measure DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (estate_id) REFERENCES estates(id)
 );
 
+-- Insert sample data
+-- First, insert a user
+INSERT INTO users (name, surname, phone, email, password) VALUES 
+    ('Admin', 'User', '555-000-000', 'admin@example.com', '$2b$10$yourhashhere');
 
+-- Then insert estates
+INSERT INTO estates (user_id, address, city, postal_code, people, max_person, area) VALUES 
+    (2, 'ul. Długa 1', 'Poznań', '61-123', 2, 4, 65.5),
+    (2, 'ul. Krótka 2', 'Poznań', '61-234', 1, 3, 48.0),
+    (2, 'os. Kwiatowe 3', 'Poznań', '61-345', 3, 5, 82.0);
 
-alter table tenants add constraint fk_contract_number foreign key (contract_number) references contracts(contract_number);
+-- Insert tenants
+INSERT INTO tenants (name, surname, phone) VALUES 
+    ('Jan', 'Kowalski', '555-123-456'),
+    ('Anna', 'Nowak', '555-234-567'),
+    ('Piotr', 'Wiśniewski', '555-345-678');
+
+-- Finally insert contracts
+INSERT INTO contracts (contract_number, estate_id, tenant_id, rental_price, rent, charges) VALUES 
+    (20230001, 1, 1, 2500.00, 12, 450.00),
+    (20230002, 2, 2, 1800.00, 12, 350.00),
+    (20230003, 3, 3, 3000.00, 12, 500.00);

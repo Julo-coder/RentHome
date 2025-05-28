@@ -1,0 +1,74 @@
+import React, { useState, useEffect } from 'react';
+import Modal from 'react-modal';
+import '../styles/modal.css';
+
+Modal.setAppElement('#root');
+
+const ContractDetailsModal = ({ isOpen, onClose, userId }) => {
+    const [contracts, setContracts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchContracts = async () => {
+            try {
+                const response = await fetch(`http://localhost:8081/contracts/user/${userId}`, {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch contracts');
+                }
+
+                const data = await response.json();
+                setContracts(data);
+            } catch (error) {
+                setError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (isOpen && userId) {
+            fetchContracts();
+        }
+    }, [isOpen, userId]);
+
+    return (
+        <Modal
+            isOpen={isOpen}
+            onRequestClose={onClose}
+            contentLabel="Contract Details"
+            className="modal-content contract-details-modal"
+        >
+            <h2 className="modal-title">Contract Details</h2>
+            {error && <div className="error-message">{error}</div>}
+            {loading ? (
+                <div className="loading-message">Loading contracts...</div>
+            ) : (
+                <div className="contracts-list">
+                    {contracts.map(contract => (
+                        <div key={contract.contract_number} className="contract-item">
+                            <div className="contract-header">
+                                <h3>Contract #{contract.contract_number}</h3>
+                                <span className="contract-duration">{contract.rent} months</span>
+                            </div>
+                            <div className="contract-info">
+                                <p><strong>Estate:</strong> {contract.address}</p>
+                                <p><strong>Tenant:</strong> {contract.tenant_name} {contract.tenant_surname}</p>
+                                <p><strong>Phone:</strong> {contract.tenant_phone}</p>
+                                <p><strong>Rental Price:</strong> {contract.rental_price} zł</p>
+                                <p><strong>Charges:</strong> {contract.charges} zł</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+            <div className="modal-buttons">
+                <button onClick={onClose} className="modal-close">Close</button>
+            </div>
+        </Modal>
+    );
+};
+
+export default ContractDetailsModal;

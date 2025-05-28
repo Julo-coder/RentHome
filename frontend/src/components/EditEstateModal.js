@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Modal from 'react-modal';
-import '../styles/modal.css';
+
 
 Modal.setAppElement('#root');
 
@@ -47,10 +47,24 @@ const EditEstateModal = ({ isOpen, onClose, estateId, onUpdate }) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        
+        if (name === 'postal_code') {
+            const numericValue = value.replace(/[^0-9]/g, '');
+            if (numericValue.length <= 5) {
+                const formattedValue = numericValue.length > 2 
+                    ? `${numericValue.slice(0,2)}-${numericValue.slice(2)}` 
+                    : numericValue;
+                setFormData(prev => ({
+                    ...prev,
+                    postal_code: formattedValue
+                }));
+            }
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -103,9 +117,35 @@ const EditEstateModal = ({ isOpen, onClose, estateId, onUpdate }) => {
             <h2 className="modal-title">Edit Estate</h2>
             {error && <div className="error-message">{error}</div>}
             <form onSubmit={handleSubmit} className="modal-form">
-                <input type="text" name="address" value={formData.address} onChange={handleChange} className="modal-input" required />
-                <input type="text" name="city" value={formData.city} onChange={handleChange} className="modal-input" required />
-                <input type="number" name="postal_code" value={formData.postal_code} onChange={handleChange} className="modal-input" required />
+                <input 
+                    type="text" 
+                    name="address" 
+                    value={formData.address} 
+                    placeholder="Address"
+                    onChange={handleChange} 
+                    className="modal-input" 
+                    required 
+                />
+                <input 
+                    type="text" 
+                    name="city" 
+                    value={formData.city}
+                    placeholder="City" 
+                    onChange={handleChange} 
+                    className="modal-input" 
+                    required 
+                />
+                <input 
+                    type="text" 
+                    name="postal_code" 
+                    value={formData.postal_code} 
+                    placeholder="Postal code (XX-XXX)"
+                    onChange={handleChange} 
+                    className="modal-input"
+                    pattern="[0-9]{2}-[0-9]{3}"
+                    maxLength="6" 
+                    required 
+                />
                 <input type="number" name="people" value={formData.people} onChange={handleChange} className="modal-input" required />
                 <input type="number" name="max_person" value={formData.max_person} onChange={handleChange} className="modal-input" required />
                 <input type="number" name="area" value={formData.area} onChange={handleChange} className="modal-input" required />
