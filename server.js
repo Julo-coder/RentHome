@@ -518,7 +518,7 @@ app.post('/contracts', async (req, res) => {
         return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const { estate_id, tenant_id, rental_price, charges, rent } = req.body;
+    const { estate_id, tenant_id, rental_price, charges, rent, contract_number } = req.body;
 
     try {
         // First verify that the estate belongs to the logged-in user
@@ -531,10 +531,17 @@ app.post('/contracts', async (req, res) => {
             return res.status(403).json({ message: "Estate not found or unauthorized access" });
         }
 
-        // Generate contract number (timestamp + random number)
-        const contract_number = Date.now() + Math.floor(Math.random() * 1000);
+        // Check if contract number already exists
+        const [existingContract] = await db.promise().query(
+            "SELECT contract_number FROM contracts WHERE contract_number = ?",
+            [contract_number]
+        );
 
-        // Insert the contract
+        if (existingContract.length > 0) {
+            return res.status(400).json({ message: "Contract number already exists" });
+        }
+
+        // Insert the contract with provided contract number
         await db.promise().query(
             `INSERT INTO contracts 
             (contract_number, estate_id, tenant_id, rental_price, charges, rent) 
@@ -581,6 +588,90 @@ app.get('/contracts/estate/:estateId', async (req, res) => {
     } catch (err) {
         console.error('Error fetching contracts:', err);
         res.status(500).json({ message: "Error fetching contracts" });
+    }
+});
+
+app.get('/contracts/user/:userId', async (req, res) => {
+    if (!req.session.user || req.session.user.id !== parseInt(req.params.userId)) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+        const [contracts] = await db.promise().query(
+            `SELECT 
+                c.contract_number,
+                c.rental_price,
+                c.charges,
+                c.rent,
+                e.address,
+                t.name as tenant_name,
+                t.surname as tenant_surname,
+                t.phone as tenant_phone
+             FROM contracts c
+             JOIN estates e ON c.estate_id = e.id
+             JOIN tenants t ON c.tenant_id = t.id
+             WHERE e.user_id = ?
+             ORDER BY c.contract_number DESC`,
+            [req.params.userId]
+        );
+
+        res.json(contracts);
+    } catch (err) {
+        console.error('Error fetching user contracts:', err);
+        res.status(500).json({ message: "Error fetching contracts" });
+    }
+});
+
+app.delete('/contracts/:contractNumber', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+        // Decode the contract number by replacing --- with /
+        const decodedContractNumber = req.params.contractNumber.replace(/---/g, '/');
+
+        // First get the contract and verify ownership
+        const [contract] = await db.promise().query(
+            `SELECT c.*, e.user_id, e.id as estate_id
+             FROM contracts c
+             JOIN estates e ON c.estate_id = e.id
+             WHERE c.contract_number = ? AND e.user_id = ?`,
+            [decodedContractNumber, req.session.user.id]
+        );
+
+        if (contract.length === 0) {
+            return res.status(404).json({ message: "Contract not found or unauthorized access" });
+        }
+
+        // Begin transaction
+        const connection = await db.promise().getConnection();
+        await connection.beginTransaction();
+
+        try {
+            // Delete the contract
+            await connection.query(
+                "DELETE FROM contracts WHERE contract_number = ?",
+                [decodedContractNumber]
+            );
+
+            // Update estate occupancy
+            await connection.query(
+                "UPDATE estates SET people = people - 1 WHERE id = ?",
+                [contract[0].estate_id]
+            );
+
+            await connection.commit();
+            res.json({ message: "Contract deleted successfully" });
+        } catch (err) {
+            await connection.rollback();
+            throw err;
+        } finally {
+            connection.release();
+        }
+    } catch (err) {
+        console.error('Error deleting contract:', err);
+        res.status(500).json({ message: "Error deleting contract" });
     }
 });
 

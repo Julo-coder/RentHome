@@ -54,9 +54,24 @@ const AddContractModal = ({ isOpen, onClose, onUpdate, userId }) => {
 
     const handleChange = (e) => {
         if (e.target.name === 'contract_number') {
-            // Only allow numbers and limit length
-            const value = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
-            setFormData({ ...formData, contract_number: value });
+            // Allow format XXX/YYYY/XXX
+            const value = e.target.value;
+            // Remove any characters that aren't numbers or forward slash
+            const cleaned = value.replace(/[^0-9/]/g, '');
+            
+            // Format the input
+            let formatted = cleaned;
+            const parts = cleaned.split('/');
+            
+            if (parts.length <= 3) {
+                if (parts[0] && parts[0].length > 3) parts[0] = parts[0].slice(0, 3);
+                if (parts[1] && parts[1].length > 4) parts[1] = parts[1].slice(0, 4);
+                if (parts[2] && parts[2].length > 3) parts[2] = parts[2].slice(0, 3);
+                
+                formatted = parts.join('/');
+            }
+            
+            setFormData({ ...formData, contract_number: formatted });
         } else {
             setFormData({ ...formData, [e.target.name]: e.target.value });
         }
@@ -116,11 +131,11 @@ const AddContractModal = ({ isOpen, onClose, onUpdate, userId }) => {
                     type="text"
                     name="contract_number"
                     value={formData.contract_number}
-                    placeholder="Contract Number"
+                    placeholder="Contract Number (e.g., 001/2023/001)"
                     onChange={handleChange}
                     className="modal-input"
-                    pattern="[0-9]{1,10}"
-                    title="Contract number must be numeric and up to 10 digits"
+                    pattern="\d{3}/\d{4}/\d{3}"
+                    title="Contract number must be in format: XXX/YYYY/XXX"
                     required
                 />
 

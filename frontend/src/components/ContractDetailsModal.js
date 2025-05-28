@@ -4,10 +4,11 @@ import '../styles/modal.css';
 
 Modal.setAppElement('#root');
 
-const ContractDetailsModal = ({ isOpen, onClose, userId }) => {
+const ContractDetailsModal = ({ isOpen, onClose, userId, onUpdate }) => {
     const [contracts, setContracts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         const fetchContracts = async () => {
@@ -34,6 +35,39 @@ const ContractDetailsModal = ({ isOpen, onClose, userId }) => {
         }
     }, [isOpen, userId]);
 
+    const handleDeleteContract = async (contractNumber) => {
+        if (!window.confirm('Are you sure you want to delete this contract?')) {
+            return;
+        }
+
+        setIsDeleting(true);
+        try {
+            // Encode the contract number by replacing / with ---
+            const encodedContractNumber = contractNumber.replace(/\//g, '---');
+            
+            const response = await fetch(`http://localhost:8081/contracts/${encodedContractNumber}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete contract');
+            }
+
+            // Remove the deleted contract from state
+            setContracts(contracts.filter(c => c.contract_number !== contractNumber));
+            
+            // Call onUpdate to refresh parent component
+            if (onUpdate) {
+                onUpdate();
+            }
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
     return (
         <Modal
             isOpen={isOpen}
@@ -51,7 +85,16 @@ const ContractDetailsModal = ({ isOpen, onClose, userId }) => {
                         <div key={contract.contract_number} className="contract-item">
                             <div className="contract-header">
                                 <h3>Contract #{contract.contract_number}</h3>
-                                <span className="contract-duration">{contract.rent} months</span>
+                                <div className="contract-actions">
+                                    <span className="contract-duration">{contract.rent} months</span>
+                                    <button 
+                                        onClick={() => handleDeleteContract(contract.contract_number)}
+                                        className="delete-btn"
+                                        disabled={isDeleting}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
                             </div>
                             <div className="contract-info">
                                 <p><strong>Estate:</strong> {contract.address}</p>

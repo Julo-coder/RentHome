@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS tenants (
 );
 
 CREATE TABLE IF NOT EXISTS contracts (
-    contract_number INT PRIMARY KEY,
+    contract_number VARCHAR(20) PRIMARY KEY,
     estate_id INT NOT NULL,
     tenant_id INT NOT NULL,
     rental_price DECIMAL(10, 2) NOT NULL,
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS estate_usage (
 -- Insert sample data
 -- First, insert a user
 INSERT INTO users (name, surname, phone, email, password) VALUES 
-    ('Admin', 'User', '555-000-000', 'admin@example.com', '$2b$10$yourhashhere');
+    ('Admin', 'User', '555-000-000', 'admin@example.com', 'admin123');
 
 -- Then insert estates
 INSERT INTO estates (user_id, address, city, postal_code, people, max_person, area) VALUES 
@@ -90,6 +90,6 @@ INSERT INTO tenants (name, surname, phone) VALUES
 
 -- Finally insert contracts
 INSERT INTO contracts (contract_number, estate_id, tenant_id, rental_price, rent, charges) VALUES 
-    (20230001, 1, 1, 2500.00, 12, 450.00),
-    (20230002, 2, 2, 1800.00, 12, 350.00),
-    (20230003, 3, 3, 3000.00, 12, 500.00);
+    (20230004, 4, 1, 2500.00, 12, 450.00),
+    (20230005, 5, 2, 1800.00, 12, 350.00),
+    (20230006, 6, 3, 3000.00, 12, 500.00);
