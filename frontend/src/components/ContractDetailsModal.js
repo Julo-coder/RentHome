@@ -10,57 +10,39 @@ const ContractDetailsModal = ({ isOpen, onClose, userId, onUpdate }) => {
     const [error, setError] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
+    const fetchContracts = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch(`http://localhost:8081/contracts/user/${userId}`, {
+                credentials: 'include'
+            });
+            if (!response.ok) throw new Error('Failed to fetch contracts');
+            const data = await response.json();
+            setContracts(data);
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchContracts = async () => {
-            try {
-                const response = await fetch(`http://localhost:8081/contracts/user/${userId}`, {
-                    credentials: 'include'
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch contracts');
-                }
-
-                const data = await response.json();
-                setContracts(data);
-            } catch (error) {
-                setError(error.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         if (isOpen && userId) {
             fetchContracts();
         }
     }, [isOpen, userId]);
 
     const handleDeleteContract = async (contractNumber) => {
-        if (!window.confirm('Are you sure you want to delete this contract?')) {
-            return;
-        }
-
         setIsDeleting(true);
         try {
-            // Encode the contract number by replacing / with ---
             const encodedContractNumber = contractNumber.replace(/\//g, '---');
-            
             const response = await fetch(`http://localhost:8081/contracts/${encodedContractNumber}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to delete contract');
-            }
-
-            // Remove the deleted contract from state
-            setContracts(contracts.filter(c => c.contract_number !== contractNumber));
-            
-            // Call onUpdate to refresh parent component
-            if (onUpdate) {
-                onUpdate();
-            }
+            if (!response.ok) throw new Error('Failed to delete contract');
+            await fetchContracts(); // <-- pobierz kontrakty na nowo
+            if (onUpdate) await onUpdate(); // <-- odśwież statystyki w profilu
         } catch (error) {
             setError(error.message);
         } finally {

@@ -41,6 +41,19 @@ export default function Profile() {
         }
     }, [navigate]);
 
+    const handleContractUpdate = useCallback(async () => {
+        try {
+            const response = await fetch(`http://localhost:8081/user/stats/${user.id}`, {
+                credentials: 'include'
+            });
+            if (!response.ok) throw new Error('Failed to fetch profile statistics');
+            const statsData = await response.json();
+            setStats(statsData);
+        } catch (error) {
+            setError(error.message);
+        }
+    }, [user?.id]);
+
     useEffect(() => {
         fetchUserProfile();
     }, [fetchUserProfile]);
@@ -115,6 +128,7 @@ export default function Profile() {
                 isOpen={isContractDetailsOpen}
                 onClose={() => setIsContractDetailsOpen(false)}
                 userId={user?.id}
+                onUpdate={handleContractUpdate}
             />
         </div>
     );
