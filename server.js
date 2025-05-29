@@ -675,6 +675,68 @@ app.delete('/contracts/:contractNumber', async (req, res) => {
     }
 });
 
+app.delete('/estates/:id', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const user_id = req.session.user.id;
+    const estate_id = req.params.id;
+
+    try {
+        // Sprawdź, czy nieruchomość należy do zalogowanego użytkownika
+        const [estate] = await db.promise().query(
+            "SELECT * FROM estates WHERE id = ? AND user_id = ?",
+            [estate_id, user_id]
+        );
+
+        if (estate.length === 0) {
+            return res.status(404).json({ message: "Estate not found or unauthorized access" });
+        }
+
+        // Rozpocznij transakcję
+        const connection = await db.promise().getConnection();
+        await connection.beginTransaction();
+
+        try {
+            // Najpierw usuń powiązane kontrakty
+            await connection.query(
+                `DELETE FROM contracts WHERE estate_id = ?`,
+                [estate_id]
+            );
+
+            // Usuń powiązane wyposażenie
+            await connection.query(
+                "DELETE FROM estate_equipments WHERE estate_id = ?",
+                [estate_id]
+            );
+
+            // Usuń powiązane zużycia mediów
+            await connection.query(
+                "DELETE FROM estate_usage WHERE estate_id = ?",
+                [estate_id]
+            );
+
+            // Na końcu usuń samą nieruchomość
+            await connection.query(
+                "DELETE FROM estates WHERE id = ? AND user_id = ?",
+                [estate_id, user_id]
+            );
+
+            await connection.commit();
+            res.json({ message: "Estate deleted successfully" });
+        } catch (err) {
+            await connection.rollback();
+            throw err;
+        } finally {
+            connection.release();
+        }
+    } catch (err) {
+        console.error('Error deleting estate:', err);
+        res.status(500).json({ message: "Error deleting estate", details: err.message });
+    }
+});
+
 app.listen(8081, () => {
     console.log("listening")
 });

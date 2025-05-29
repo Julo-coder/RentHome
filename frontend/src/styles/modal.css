@@ -153,11 +153,24 @@
 }
 
 .contract-duration {
-    background-color: var(--color-btn);
-    color: white;
-    padding: 0.25rem 0.5rem;
+    background-color: var(--color-header);
+    color: var(--color-btn);
+    padding: 0.5rem 1rem;
     border-radius: 4px;
     font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.contract-item:hover .contract-duration {
+    background-color: var(--color-btn);
+    color: white;
+    transform: translateY(-1px);
 }
 
 .contract-info p {

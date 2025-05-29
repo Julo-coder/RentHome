@@ -6,6 +6,7 @@ import AddUsageModal from './AddUsageModal';
 import UsageCharts from './UsageCharts';
 import AddEquipmentModal from './AddEquipmentModal';
 import EqList from './EqList';
+import Popup from './Popup';
 
 export default function Details() {
     const [estate, setEstate] = useState(null);
@@ -19,6 +20,7 @@ export default function Details() {
     const [isAddUsageModalOpen, setIsAddUsageModalOpen] = useState(false);
     const [isAddEquipmentModalOpen, setIsAddEquipmentModalOpen] = useState(false);
     const [isEquipmentListOpen, setIsEquipmentListOpen] = useState(false);
+    const [deletePopupOpen, setDeletePopupOpen] = useState(false);
 
     const fetchEstateDetails = useCallback(async () => {
         try {
@@ -79,6 +81,31 @@ export default function Details() {
         fetchEstateDetails(); // Odśwież dane po udanej aktualizacji
     }, [fetchEstateDetails]);
 
+    const handleDeleteEstate = () => {
+        setDeletePopupOpen(true);
+    };
+
+    const confirmDeleteEstate = async () => {
+        try {
+            const response = await fetch(`http://localhost:8081/estates/${estateId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete estate');
+            }
+
+            // Po pomyślnym usunięciu, przekieruj do listy nieruchomości
+            navigate('/estate');
+        } catch (error) {
+            console.error('Error:', error);
+            setError(error.message);
+        } finally {
+            setDeletePopupOpen(false);
+        }
+    };
+
     if (loading) return <div className="loading-div">Loading...</div>;
     if (error) return <div className="error-div">Error: {error}</div>;
     if (!estate) return <div className="not-found-div">Estate not found</div>;
@@ -87,7 +114,8 @@ export default function Details() {
         { label: "Back to Estates", to: "/estate" },
         { label: "Edit Estate", to: "#", onClick: handleEditEstate },
         { label: "Add Usage", to: "#", onClick: () => setIsAddUsageModalOpen(true) },
-        { label: "Add Equipment", to: "#", onClick: () => setIsAddEquipmentModalOpen(true) }
+        { label: "Add Equipment", to: "#", onClick: () => setIsAddEquipmentModalOpen(true) },
+        { label: "Delete Estate", to: "#", onClick: handleDeleteEstate, className: "delete-btn" }
     ];
 
     return (
@@ -162,6 +190,17 @@ export default function Details() {
                 onClose={() => setIsAddEquipmentModalOpen(false)}
                 onUpdate={fetchEstateDetails}
                 estateId={estateId}
+            />
+
+            <Popup
+                isOpen={deletePopupOpen}
+                title="Delete Estate"
+                message="Are you sure you want to delete this estate? This will also delete all contracts, equipment, and usage data associated with it. This action cannot be undone."
+                onConfirm={confirmDeleteEstate}
+                onCancel={() => setDeletePopupOpen(false)}
+                confirmLabel="Delete"
+                cancelLabel="Cancel"
+                isDanger={true}
             />
         </div>
     );

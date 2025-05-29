@@ -9,6 +9,7 @@
 @import "./details.css";
 @import "./modal.css";
 @import "./profile.css";
+@import "./popup.css";
 
 * {
   margin: 0;
