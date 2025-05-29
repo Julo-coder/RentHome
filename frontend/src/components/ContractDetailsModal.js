@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Modal from 'react-modal';
 import '../styles/modal.css';
 
@@ -10,7 +10,8 @@ const ContractDetailsModal = ({ isOpen, onClose, userId, onUpdate }) => {
     const [error, setError] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const fetchContracts = async () => {
+    // Użyj useCallback, aby funkcja była stabilna między renderowaniami
+    const fetchContracts = useCallback(async () => {
         setLoading(true);
         try {
             const response = await fetch(`http://localhost:8081/contracts/user/${userId}`, {
@@ -24,13 +25,13 @@ const ContractDetailsModal = ({ isOpen, onClose, userId, onUpdate }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [userId]); // userId jest zależnością, ponieważ używamy jej w fetchu
 
     useEffect(() => {
         if (isOpen && userId) {
             fetchContracts();
         }
-    }, [isOpen, userId]);
+    }, [isOpen, userId, fetchContracts]); // Dodaj fetchContracts do tablicy zależności
 
     const handleDeleteContract = async (contractNumber) => {
         setIsDeleting(true);
