@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS contracts (
     rental_price DECIMAL(10, 2) NOT NULL,
     rent INT NOT NULL,
     charges DECIMAL(10, 2) NOT NULL,
+    start_date DATE NOT NULL DEFAULT (CURRENT_DATE),
     FOREIGN KEY (estate_id) REFERENCES estates(id),
     FOREIGN KEY (tenant_id) REFERENCES tenants(id)
 );

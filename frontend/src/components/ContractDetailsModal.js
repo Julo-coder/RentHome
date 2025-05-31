@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Modal from 'react-modal';
 import '../styles/modal.css';
 
-
 const ContractDetailsModal = ({ isOpen, onClose, userId, onUpdate }) => {
     const [contracts, setContracts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -24,18 +23,17 @@ const ContractDetailsModal = ({ isOpen, onClose, userId, onUpdate }) => {
         } finally {
             setLoading(false);
         }
-    }, [userId]); // userId jest zależnością, ponieważ używamy jej w fetchu
+    }, [userId]); 
 
     useEffect(() => {
         if (isOpen && userId) {
             fetchContracts();
         }
-    }, [isOpen, userId, fetchContracts]); // Dodaj fetchContracts do tablicy zależności
+    }, [isOpen, userId, fetchContracts]);
 
     const handleDeleteContract = async (contractNumber) => {
         setIsDeleting(true);
         try {
-            // Properly encode the contract number for URL safety
             const encodedContractNumber = encodeURIComponent(contractNumber);
             
             const response = await fetch(`http://localhost:8081/contracts/${encodedContractNumber}`, {
@@ -43,8 +41,8 @@ const ContractDetailsModal = ({ isOpen, onClose, userId, onUpdate }) => {
                 credentials: 'include'
             });
             if (!response.ok) throw new Error('Failed to delete contract');
-            await fetchContracts(); // <-- pobierz kontrakty na nowo
-            if (onUpdate) await onUpdate(); // <-- odśwież statystyki w profilu
+            await fetchContracts();
+            if (onUpdate) await onUpdate();
         } catch (error) {
             setError(error.message);
         } finally {
@@ -52,12 +50,39 @@ const ContractDetailsModal = ({ isOpen, onClose, userId, onUpdate }) => {
         }
     };
 
+    // Function to calculate remaining time on contract
+    const calculateRemainingTime = (startDate, durationMonths) => {
+        if (!startDate) return 'Date information missing';
+
+        const start = new Date(startDate);
+        const today = new Date();
+        
+        // Calculate end date (start date + duration in months)
+        const endDate = new Date(start);
+        endDate.setMonth(endDate.getMonth() + durationMonths);
+        
+        // If contract has ended
+        if (today > endDate) {
+            return 'Contract expired';
+        }
+        
+        // Calculate difference in milliseconds
+        const diffMs = endDate - today;
+        
+        // Convert milliseconds to days
+        const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const months = Math.floor(totalDays / 30);
+        const days = totalDays % 30;
+        
+        return `${months} month${months !== 1 ? 's' : ''} and ${days} day${days !== 1 ? 's' : ''} remaining`;
+    };
+
     return (
         <Modal
             isOpen={isOpen}
             onRequestClose={onClose}
             contentLabel="Contract Details"
-            className="modal-content contract-details-modal"
+            className="modal-container contract-details-modal"
         >
             <h2 className="modal-title">Contract Details</h2>
             {error && <div className="error-message">{error}</div>}
@@ -86,6 +111,9 @@ const ContractDetailsModal = ({ isOpen, onClose, userId, onUpdate }) => {
                                 <p><strong>Phone:</strong> {contract.tenant_phone}</p>
                                 <p><strong>Rental Price:</strong> {contract.rental_price} zł</p>
                                 <p><strong>Charges:</strong> {contract.charges} zł</p>
+                                <p className="contract-remaining-time">
+                                    <strong>Time Remaining:</strong> {calculateRemainingTime(contract.start_date, contract.rent)}
+                                </p>
                             </div>
                         </div>
                     ))}

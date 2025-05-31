@@ -591,6 +591,7 @@ app.get('/contracts/estate/:estateId', async (req, res) => {
     }
 });
 
+// Update your contracts/user/:userId endpoint
 app.get('/contracts/user/:userId', async (req, res) => {
     if (!req.session.user || req.session.user.id !== parseInt(req.params.userId)) {
         return res.status(401).json({ message: "Unauthorized" });
@@ -603,6 +604,7 @@ app.get('/contracts/user/:userId', async (req, res) => {
                 c.rental_price,
                 c.charges,
                 c.rent,
+                c.start_date,
                 e.address,
                 t.name as tenant_name,
                 t.surname as tenant_surname,
@@ -848,6 +850,114 @@ app.put('/estate-equipment/:id', async (req, res) => {
         });
     } catch (err) {
         console.error('Error updating equipment:', err);
+        res.status(500).json({ message: "Error updating equipment" });
+    }
+});
+
+// Dodaj ten endpoint do pliku server.js
+
+// Pobieranie wyposażenia dla danego mieszkania
+app.get('/equipment/:estateId', async (req, res) => {
+    try {
+        // Sprawdzamy czy użytkownik jest zalogowany
+        if (!req.session.user) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const estateId = req.params.estateId;
+        
+        // Najpierw sprawdzamy, czy mieszkanie należy do zalogowanego użytkownika
+        const [estates] = await db.promise().query(
+            "SELECT * FROM estates WHERE id = ? AND user_id = ?",
+            [estateId, req.session.user.id]
+        );
+        
+        if (estates.length === 0) {
+            return res.status(403).json({ message: "You do not have permission to access this estate" });
+        }
+        
+        // Pobieramy wyposażenie dla mieszkania
+        const [equipment] = await db.promise().query(
+            "SELECT * FROM estate_equipments WHERE estate_id = ?",
+            [estateId]
+        );
+        
+        res.json(equipment);
+    } catch (err) {
+        console.error('Error fetching estate equipment:', err);
+        res.status(500).json({ message: "Error fetching equipment" });
+    }
+});
+
+// Usuwanie wyposażenia
+app.delete('/equipment/:estateId/:equipmentName', async (req, res) => {
+    try {
+        // Sprawdzamy czy użytkownik jest zalogowany
+        if (!req.session.user) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const { estateId, equipmentName } = req.params;
+        
+        // Najpierw sprawdzamy, czy mieszkanie należy do zalogowanego użytkownika
+        const [estates] = await db.promise().query(
+            "SELECT * FROM estates WHERE id = ? AND user_id = ?",
+            [estateId, req.session.user.id]
+        );
+        
+        if (estates.length === 0) {
+            return res.status(403).json({ message: "You do not have permission to access this estate" });
+        }
+        
+        // Usuwamy wyposażenie
+        await db.promise().query(
+            "DELETE FROM estate_equipments WHERE estate_id = ? AND estate_equipment = ?",
+            [estateId, equipmentName]
+        );
+        
+        res.json({ message: "Equipment deleted successfully" });
+    } catch (err) {
+        console.error('Error deleting estate equipment:', err);
+        res.status(500).json({ message: "Error deleting equipment" });
+    }
+});
+
+// Aktualizacja wyposażenia
+app.put('/equipment/:estateId', async (req, res) => {
+    try {
+        // Sprawdzamy czy użytkownik jest zalogowany
+        if (!req.session.user) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const estateId = req.params.estateId;
+        const { estate_equipment, quantity, equipment_condition, original_equipment } = req.body;
+        
+        // Sprawdzamy, czy wszystkie wymagane pola są obecne
+        if (!estate_equipment || !quantity || !equipment_condition || !original_equipment) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
+        
+        // Najpierw sprawdzamy, czy mieszkanie należy do zalogowanego użytkownika
+        const [estates] = await db.promise().query(
+            "SELECT * FROM estates WHERE id = ? AND user_id = ?",
+            [estateId, req.session.user.id]
+        );
+        
+        if (estates.length === 0) {
+            return res.status(403).json({ message: "You do not have permission to access this estate" });
+        }
+        
+        // Aktualizujemy wyposażenie
+        await db.promise().query(
+            "UPDATE estate_equipments SET estate_equipment = ?, quantity = ?, equipment_condition = ? " +
+            "WHERE estate_id = ? AND estate_equipment = ?",
+            [estate_equipment, quantity, equipment_condition, estateId, original_equipment]
+        );
+        
+        res.json({ message: "Equipment updated successfully" });
+    } catch (err) {
+        console.error('Error updating estate equipment:', err);
         res.status(500).json({ message: "Error updating equipment" });
     }
 });

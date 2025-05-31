@@ -69,75 +69,75 @@ const EditEquipmentModal = ({ isOpen, onClose, equipment, onUpdateEquipment }) =
             isOpen={isOpen}
             onRequestClose={onClose}
             contentLabel="Edit Equipment"
-            className="modal-content"
+            className="modal-container edit-equipment-modal"
+            ariaHideApp={false}
         >
             <h2 className="modal-title">Edit Equipment</h2>
             {error && <div className="error-message">{error}</div>}
             {successMessage && <div className="success-message">{successMessage}</div>}
             
-            <div className="modal-content">
-                <form onSubmit={handleSubmit} className="modal-form">
-                    <div className="form-group">
-                        <label htmlFor="estate_equipment">Equipment Name</label>
-                        <input
-                            type="text"
-                            id="estate_equipment"
-                            name="estate_equipment"
-                            value={formData.estate_equipment}
-                            onChange={handleChange}
-                            className="modal-input"
-                            required
-                        />
-                    </div>
-                    
-                    <div className="form-group">
-                        <label htmlFor="quantity">Quantity</label>
-                        <input
-                            type="number"
-                            id="quantity"
-                            name="quantity"
-                            min="1"
-                            value={formData.quantity}
-                            onChange={handleChange}
-                            className="modal-input"
-                            required
-                        />
-                    </div>
-                    
-                    <div className="form-group">
-                        <label htmlFor="equipment_condition">Condition</label>
-                        <select
-                            id="equipment_condition"
-                            name="equipment_condition"
-                            value={formData.equipment_condition}
-                            onChange={handleChange}
-                            className="modal-input"
-                            required
-                        >
-                            <option value="New">New</option>
-                            <option value="Good">Good</option>
-                            <option value="Fair">Fair</option>
-                            <option value="Poor">Poor</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-            
-            <div className="modal-buttons">
-                <button 
-                    onClick={handleSubmit} 
-                    className="modal-submit"
-                    disabled={loading}
-                >
-                    {loading ? 'Updating...' : 'Update Equipment'}
-                </button>
-                <button 
-                    onClick={onClose} 
-                    className="modal-close"
-                >
-                    Cancel
-                </button>
-            </div>
+            <form onSubmit={handleSubmit} className="modal-form">
+                <div className="form-group">
+                    <label htmlFor="estate_equipment">Equipment Name</label>
+                    <input
+                        type="text"
+                        id="estate_equipment"
+                        name="estate_equipment"
+                        value={formData.estate_equipment}
+                        onChange={handleChange}
+                        className="modal-input"
+                        required
+                    />
+                </div>
+                
+                <div className="form-group">
+                    <label htmlFor="quantity">Quantity</label>
+                    <input
+                        type="number"
+                        id="quantity"
+                        name="quantity"
+                        min="1"
+                        value={formData.quantity}
+                        onChange={handleChange}
+                        className="modal-input"
+                        required
+                    />
+                </div>
+                
+                <div className="form-group">
+                    <label htmlFor="equipment_condition">Condition</label>
+                    <select
+                        id="equipment_condition"
+                        name="equipment_condition"
+                        value={formData.equipment_condition}
+                        onChange={handleChange}
+                        className="modal-input"
+                        required
+                    >
+                        <option value="Excellent">Excellent</option>
+                        <option value="Good">Good</option>
+                        <option value="Fair">Fair</option>
+                        <option value="Poor">Poor</option>
+                    </select>
+                </div>
+                
+                <div className="modal-buttons">
+                    <button 
+                        type="submit" 
+                        className="modal-submit"
+                        disabled={loading}
+                    >
+                        {loading ? 'Updating...' : 'Update Equipment'}
+                    </button>
+                    <button 
+                        type="button"
+                        onClick={onClose} 
+                        className="modal-close"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </form>
         </Modal>
     );
 };

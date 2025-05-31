@@ -1,12 +1,12 @@
 USE RentHome;
 
--- First insert tenants
+-- Then insert tenants
 INSERT INTO tenants (name, surname, phone) VALUES 
     ('Jan', 'Kowalski', '555-123-456'),
     ('Anna', 'Nowak', '555-234-567'),
     ('Piotr', 'Wiśniewski', '555-345-678');
 
--- Then insert estates
+-- Then insert estates (now user_id=1 exists)
 INSERT INTO estates (user_id, address, city, postal_code, people, max_person, area) VALUES 
     (1, 'ul. Długa 1', 'Poznań', '61-123', 2, 4, 65.5),
     (1, 'ul. Krótka 2', 'Poznań', '61-234', 1, 3, 48.0),

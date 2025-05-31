@@ -72,12 +72,39 @@ const EstateContractsModal = ({ isOpen, onClose, estateId }) => {
         }
     };
 
+    // Function to calculate remaining time on contract
+    const calculateRemainingTime = (startDate, durationMonths) => {
+        if (!startDate) return 'Date information missing';
+
+        const start = new Date(startDate);
+        const today = new Date();
+        
+        // Calculate end date (start date + duration in months)
+        const endDate = new Date(start);
+        endDate.setMonth(endDate.getMonth() + durationMonths);
+        
+        // If contract has ended
+        if (today > endDate) {
+            return 'Contract expired';
+        }
+        
+        // Calculate difference in milliseconds
+        const diffMs = endDate - today;
+        
+        // Convert milliseconds to days
+        const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const months = Math.floor(totalDays / 30);
+        const days = totalDays % 30;
+        
+        return `${months} month${months !== 1 ? 's' : ''} and ${days} day${days !== 1 ? 's' : ''} remaining`;
+    };
+
     return (
         <Modal
             isOpen={isOpen}
             onRequestClose={onClose}
             contentLabel="Estate Contracts"
-            className="modal-content contract-details-modal"
+            className="modal-container contract-details-modal"
             ariaHideApp={false}
         >
             <h2 className="modal-title">Estate Contracts</h2>
@@ -130,6 +157,9 @@ const EstateContractsModal = ({ isOpen, onClose, estateId }) => {
                                 <p><strong>Phone:</strong> {contract.phone}</p>
                                 <p><strong>Rental Price:</strong> {contract.rental_price} zł</p>
                                 <p><strong>Charges:</strong> {contract.charges} zł</p>
+                                <p className="contract-remaining-time">
+                                    <strong>Time Remaining:</strong> {calculateRemainingTime(contract.start_date, contract.rent)}
+                                </p>
                             </div>
                         </div>
                     ))}
