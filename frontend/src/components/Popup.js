@@ -1,5 +1,4 @@
 import React from 'react';
-import '../styles/popup.css';
 
 const Popup = ({ 
   isOpen, 

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import '../styles/modal.css';
 
-Modal.setAppElement('#root');
 
 const EqList = ({ isOpen, onClose, estateId }) => {
     const [equipment, setEquipment] = useState([]);

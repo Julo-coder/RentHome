@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Modal from 'react-modal';
 import '../styles/modal.css';
 
-Modal.setAppElement('#root');
+
 
 const AddUsageModal = ({ isOpen, onClose, estateId, onUpdate }) => {
     const [formData, setFormData] = useState({

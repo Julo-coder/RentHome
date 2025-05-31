@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Modal from 'react-modal';
 import '../styles/modal.css';
 
-Modal.setAppElement('#root');
 
 const ContractDetailsModal = ({ isOpen, onClose, userId, onUpdate }) => {
     const [contracts, setContracts] = useState([]);

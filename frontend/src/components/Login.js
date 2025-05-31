@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from "./Header";
 import { Link } from "react-router-dom";
@@ -7,7 +7,24 @@ export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [user, setUser] = useState(null);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const userData = localStorage.getItem('user');
+        if (!userData) {
+            navigate('/login');
+        } else {
+            try {
+                const user = JSON.parse(userData);
+                setUser(user);
+            } catch (error) {
+                console.error('Error parsing user data:', error);
+                localStorage.removeItem('user');
+                navigate('/login');
+            }
+        }
+    }, [navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

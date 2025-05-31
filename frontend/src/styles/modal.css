@@ -184,7 +184,6 @@
 .contract-actions {
     display: flex;
     align-items: center;
-    gap: 1rem;
 }
 
 .delete-btn {
@@ -218,4 +217,63 @@
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
+}
+
+.delete-contract-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: background-color 0.3s;
+}
+
+.delete-contract-btn:hover {
+    background-color: #c0392b;
+}
+
+.delete-confirmation {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.confirmation-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.confirm-delete-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 15px;
+    cursor: pointer;
+}
+
+.confirm-delete-btn:disabled {
+    background-color: #b3b3b3;
+    cursor: not-allowed;
+}
+
+.cancel-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 15px;
+    cursor: pointer;
+}
+
+.cancel-btn:disabled {
+    background-color: #b3b3b3;
+    cursor: not-allowed;
 }

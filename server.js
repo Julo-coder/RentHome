@@ -568,7 +568,7 @@ app.post('/contracts', async (req, res) => {
     }
 });
 
-// Get contracts for an estate
+// Get contracts for a specific estate
 app.get('/contracts/estate/:estateId', async (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ message: "Unauthorized" });
@@ -576,7 +576,7 @@ app.get('/contracts/estate/:estateId', async (req, res) => {
 
     try {
         const [rows] = await db.promise().query(
-            `SELECT c.*, t.name, t.surname 
+            `SELECT c.*, t.name, t.surname, t.phone 
              FROM contracts c
              JOIN tenants t ON c.tenant_id = t.id
              JOIN estates e ON c.estate_id = e.id
@@ -586,7 +586,7 @@ app.get('/contracts/estate/:estateId', async (req, res) => {
         );
         res.json(rows);
     } catch (err) {
-        console.error('Error fetching contracts:', err);
+        console.error('Error fetching estate contracts:', err);
         res.status(500).json({ message: "Error fetching contracts" });
     }
 });
@@ -622,53 +622,38 @@ app.get('/contracts/user/:userId', async (req, res) => {
     }
 });
 
+// Delete a contract by contract number
 app.delete('/contracts/:contractNumber', async (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ message: "Unauthorized" });
     }
 
+    const contractNumber = req.params.contractNumber;
+    
     try {
-        // Decode the contract number by replacing --- with /
-        const decodedContractNumber = req.params.contractNumber.replace(/---/g, '/');
-
-        // First get the contract and verify ownership
-        const [contract] = await db.promise().query(
-            `SELECT c.*, e.user_id, e.id as estate_id
-             FROM contracts c
-             JOIN estates e ON c.estate_id = e.id
-             WHERE c.contract_number = ? AND e.user_id = ?`,
-            [decodedContractNumber, req.session.user.id]
+        // First verify that the contract belongs to the user's estate
+        const [contractCheck] = await db.promise().query(
+            `SELECT c.* FROM contracts c
+            JOIN estates e ON c.estate_id = e.id
+            WHERE c.contract_number = ? AND e.user_id = ?`,
+            [contractNumber, req.session.user.id]
         );
-
-        if (contract.length === 0) {
-            return res.status(404).json({ message: "Contract not found or unauthorized access" });
+        
+        if (contractCheck.length === 0) {
+            return res.status(404).json({ message: "Contract not found or you don't have permission" });
         }
-
-        // Begin transaction
-        const connection = await db.promise().getConnection();
-        await connection.beginTransaction();
-
-        try {
-            // Delete the contract
-            await connection.query(
-                "DELETE FROM contracts WHERE contract_number = ?",
-                [decodedContractNumber]
-            );
-
-            // Update estate occupancy
-            await connection.query(
-                "UPDATE estates SET people = people - 1 WHERE id = ?",
-                [contract[0].estate_id]
-            );
-
-            await connection.commit();
-            res.json({ message: "Contract deleted successfully" });
-        } catch (err) {
-            await connection.rollback();
-            throw err;
-        } finally {
-            connection.release();
+        
+        // If verified, delete the contract
+        const [result] = await db.promise().query(
+            'DELETE FROM contracts WHERE contract_number = ?',
+            [contractNumber]
+        );
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Contract not found" });
         }
+        
+        res.json({ message: "Contract deleted successfully" });
     } catch (err) {
         console.error('Error deleting contract:', err);
         res.status(500).json({ message: "Error deleting contract" });

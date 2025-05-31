@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Modal from 'react-modal';
 
-
-Modal.setAppElement('#root');
-
 const EditEstateModal = ({ isOpen, onClose, estateId, onUpdate }) => {
     const [formData, setFormData] = useState({
         address: '',

@@ -6,6 +6,7 @@ import AddUsageModal from './AddUsageModal';
 import UsageCharts from './UsageCharts';
 import AddEquipmentModal from './AddEquipmentModal';
 import EqList from './EqList';
+import EstateContractsModal from './EstateContractsModal';
 import Popup from './Popup';
 
 export default function Details() {
@@ -21,6 +22,7 @@ export default function Details() {
     const [isAddEquipmentModalOpen, setIsAddEquipmentModalOpen] = useState(false);
     const [isEquipmentListOpen, setIsEquipmentListOpen] = useState(false);
     const [deletePopupOpen, setDeletePopupOpen] = useState(false);
+    const [isContractsModalOpen, setIsContractsModalOpen] = useState(false);
 
     const fetchEstateDetails = useCallback(async () => {
         try {
@@ -128,12 +130,20 @@ export default function Details() {
                     <div className="info-section">
                         <div className="info-header">
                             <h3>Basic Information</h3>
-                            <button 
-                                onClick={() => setIsEquipmentListOpen(true)}
-                                className="show-equipment-btn"
-                            >
-                                Show Equipment
-                            </button>
+                            <div className="button-group">
+                                <button 
+                                    onClick={() => setIsContractsModalOpen(true)}
+                                    className="show-contracts-btn"
+                                >
+                                    View Contracts
+                                </button>
+                                <button 
+                                    onClick={() => setIsEquipmentListOpen(true)}
+                                    className="show-equipment-btn"
+                                >
+                                    Show Equipment
+                                </button>
+                            </div>
                         </div>
                         <p><strong>Address:</strong> {estate.address}</p>
                         <p><strong>City:</strong> {estate.city}</p>
@@ -189,6 +199,12 @@ export default function Details() {
                 isOpen={isAddEquipmentModalOpen}
                 onClose={() => setIsAddEquipmentModalOpen(false)}
                 onUpdate={fetchEstateDetails}
+                estateId={estateId}
+            />
+
+            <EstateContractsModal
+                isOpen={isContractsModalOpen}
+                onClose={() => setIsContractsModalOpen(false)}
                 estateId={estateId}
             />
 

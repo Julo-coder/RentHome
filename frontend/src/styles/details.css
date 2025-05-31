@@ -185,22 +185,29 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 15px;
 }
 
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+.show-contracts-btn, 
 .show-equipment-btn {
-    padding: 0.5rem 1rem;
-    background-color: var(--color-btn);
+    padding: 8px 12px;
+    background-color: #4a90e2;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.2s;
+    font-size: 14px;
+    transition: background-color 0.3s;
 }
 
+.show-contracts-btn:hover, 
 .show-equipment-btn:hover {
-    background-color: var(--color-btn-hoover);
+    background-color: #3a80d2;
 }
 
 .equipment-table {
