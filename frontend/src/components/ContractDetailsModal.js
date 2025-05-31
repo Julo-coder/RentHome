@@ -35,7 +35,9 @@ const ContractDetailsModal = ({ isOpen, onClose, userId, onUpdate }) => {
     const handleDeleteContract = async (contractNumber) => {
         setIsDeleting(true);
         try {
-            const encodedContractNumber = contractNumber.replace(/\//g, '---');
+            // Properly encode the contract number for URL safety
+            const encodedContractNumber = encodeURIComponent(contractNumber);
+            
             const response = await fetch(`http://localhost:8081/contracts/${encodedContractNumber}`, {
                 method: 'DELETE',
                 credentials: 'include'

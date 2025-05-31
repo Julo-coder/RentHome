@@ -628,12 +628,13 @@ app.delete('/contracts/:contractNumber', async (req, res) => {
         return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const contractNumber = req.params.contractNumber;
+    // Decode the contract number from URL
+    const contractNumber = decodeURIComponent(req.params.contractNumber);
     
     try {
         // First verify that the contract belongs to the user's estate
         const [contractCheck] = await db.promise().query(
-            `SELECT c.* FROM contracts c
+            `SELECT c.*, e.id as estate_id FROM contracts c
             JOIN estates e ON c.estate_id = e.id
             WHERE c.contract_number = ? AND e.user_id = ?`,
             [contractNumber, req.session.user.id]
@@ -643,17 +644,34 @@ app.delete('/contracts/:contractNumber', async (req, res) => {
             return res.status(404).json({ message: "Contract not found or you don't have permission" });
         }
         
-        // If verified, delete the contract
-        const [result] = await db.promise().query(
-            'DELETE FROM contracts WHERE contract_number = ?',
-            [contractNumber]
-        );
+        // Get the estate_id to update the people count
+        const estate_id = contractCheck[0].estate_id;
         
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: "Contract not found" });
+        // Begin transaction
+        const connection = await db.promise().getConnection();
+        await connection.beginTransaction();
+        
+        try {
+            // Delete the contract
+            await connection.query(
+                'DELETE FROM contracts WHERE contract_number = ?',
+                [contractNumber]
+            );
+            
+            // Update the estate's occupancy (decrease people count)
+            await connection.query(
+                'UPDATE estates SET people = GREATEST(people - 1, 0) WHERE id = ?',
+                [estate_id]
+            );
+            
+            await connection.commit();
+            res.json({ message: "Contract deleted successfully" });
+        } catch (err) {
+            await connection.rollback();
+            throw err;
+        } finally {
+            connection.release();
         }
-        
-        res.json({ message: "Contract deleted successfully" });
     } catch (err) {
         console.error('Error deleting contract:', err);
         res.status(500).json({ message: "Error deleting contract" });
@@ -719,6 +737,118 @@ app.delete('/estates/:id', async (req, res) => {
     } catch (err) {
         console.error('Error deleting estate:', err);
         res.status(500).json({ message: "Error deleting estate", details: err.message });
+    }
+});
+
+// Delete equipment
+app.delete('/estate-equipment/:id', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+        // Parse the equipment data from the request
+        // We'll need to know exactly what fields to use for identification
+        // Since there's no ID in the table, we'll need a different approach
+        
+        // Get the equipment ID from the frontend - this might be an identifier created by combining fields
+        // or it might need to be parsed from a combined string
+        const equipmentData = req.params.id.split('_');
+        
+        if (equipmentData.length < 2) {
+            return res.status(400).json({ message: "Invalid equipment identifier" });
+        }
+        
+        const estate_id = equipmentData[0];
+        const estate_equipment = decodeURIComponent(equipmentData[1]);
+        
+        // First verify that the equipment belongs to the user's estate
+        const [estateCheck] = await db.promise().query(
+            `SELECT e.* FROM estates e
+             WHERE e.id = ? AND e.user_id = ?`,
+            [estate_id, req.session.user.id]
+        );
+        
+        if (estateCheck.length === 0) {
+            return res.status(404).json({ message: "Estate not found or you don't have permission" });
+        }
+        
+        // If verified, delete the equipment
+        const [result] = await db.promise().query(
+            "DELETE FROM estate_equipments WHERE estate_id = ? AND estate_equipment = ?",
+            [estate_id, estate_equipment]
+        );
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Equipment not found" });
+        }
+        
+        res.json({ message: "Equipment deleted successfully" });
+    } catch (err) {
+        console.error('Error deleting equipment:', err);
+        res.status(500).json({ message: "Error deleting equipment" });
+    }
+});
+
+// Update equipment
+app.put('/estate-equipment/:id', async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+        // Parse the equipment data from the request
+        const equipmentData = req.params.id.split('_');
+        
+        if (equipmentData.length < 2) {
+            return res.status(400).json({ message: "Invalid equipment identifier" });
+        }
+        
+        const estate_id = equipmentData[0];
+        const original_equipment = decodeURIComponent(equipmentData[1]);
+        
+        // Get the updated data from request body
+        const { estate_equipment, quantity, equipment_condition } = req.body;
+        
+        if (!estate_equipment || !quantity || !equipment_condition) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+        
+        // First verify that the equipment belongs to the user's estate
+        const [estateCheck] = await db.promise().query(
+            `SELECT e.* FROM estates e
+             WHERE e.id = ? AND e.user_id = ?`,
+            [estate_id, req.session.user.id]
+        );
+        
+        if (estateCheck.length === 0) {
+            return res.status(404).json({ message: "Estate not found or you don't have permission" });
+        }
+        
+        // If verified, update the equipment
+        const [result] = await db.promise().query(
+            `UPDATE estate_equipments 
+             SET estate_equipment = ?, quantity = ?, equipment_condition = ? 
+             WHERE estate_id = ? AND estate_equipment = ?`,
+            [estate_equipment, quantity, equipment_condition, estate_id, original_equipment]
+        );
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Equipment not found" });
+        }
+        
+        res.json({ 
+            message: "Equipment updated successfully",
+            equipment: {
+                estate_id,
+                estate_equipment,
+                quantity,
+                equipment_condition
+            }
+        });
+    } catch (err) {
+        console.error('Error updating equipment:', err);
+        res.status(500).json({ message: "Error updating equipment" });
     }
 });
 

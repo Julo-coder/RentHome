@@ -4,58 +4,64 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   z-index: 1000;
-  backdrop-filter: blur(3px);
-  animation: fadeIn 0.2s ease;
+  animation: fadeIn 0.2s ease-in;
 }
 
 .popup {
   background-color: var(--color-primary);
   border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  padding: 2rem;
   width: 90%;
   max-width: 450px;
-  padding: 2rem;
-  position: relative;
-  animation: slideDown 0.3s ease;
-  border-top: 4px solid var(--color-btn);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.3s ease-out;
 }
 
 .popup-title {
-  font-size: 1.5rem;
-  color: var(--color-text);
+  color: var(--color-btn);
+  margin-top: 0;
   margin-bottom: 1rem;
+  font-size: 1.5rem;
   text-align: center;
-  font-weight: bold;
 }
 
 .popup-message {
-  font-size: 1.1rem;
-  color: var(--color-p);
   margin-bottom: 1.5rem;
-  line-height: 1.5;
+  color: #333;
   text-align: center;
+  font-size: 1.1rem;
+  line-height: 1.5;
 }
 
 .popup-buttons {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   gap: 1rem;
 }
 
 .popup-btn {
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-width: 100px;
-  text-align: center;
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: 6px;
   border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.popup-btn-cancel {
+  background-color: var(--color-secondary);
+  color: var(--color-btn);
+}
+
+.popup-btn-cancel:hover {
+  background-color: #c0c0c0;
 }
 
 .popup-btn-confirm {
@@ -65,19 +71,6 @@
 
 .popup-btn-confirm:hover {
   background-color: var(--color-btn-hoover);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.popup-btn-cancel {
-  background-color: transparent;
-  border: 1px solid var(--color-p);
-  color: var(--color-p);
-}
-
-.popup-btn-cancel:hover {
-  background-color: rgba(150, 150, 150, 0.1);
-  transform: translateY(-2px);
 }
 
 .popup-btn-danger {
@@ -86,9 +79,7 @@
 }
 
 .popup-btn-danger:hover {
-  background-color: #bd2130;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+  background-color: #c82333;
 }
 
 @keyframes fadeIn {
@@ -96,13 +87,13 @@
   to { opacity: 1; }
 }
 
-@keyframes slideDown {
+@keyframes slideIn {
   from { 
+    transform: translateY(-20px);
     opacity: 0;
-    transform: translateY(-30px);
   }
   to { 
-    opacity: 1;
     transform: translateY(0);
+    opacity: 1;
   }
 }

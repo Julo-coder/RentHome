@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Modal from 'react-modal';
 import '../styles/modal.css';
 
@@ -10,7 +10,8 @@ const EstateContractsModal = ({ isOpen, onClose, estateId }) => {
     const [deleteContractId, setDeleteContractId] = useState(null);
     const [confirmDelete, setConfirmDelete] = useState(false);
 
-    const fetchContracts = async () => {
+    // Use useCallback to memoize the fetchContracts function
+    const fetchContracts = useCallback(async () => {
         if (!estateId) return;
         
         setLoading(true);
@@ -26,13 +27,13 @@ const EstateContractsModal = ({ isOpen, onClose, estateId }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [estateId]); // Include estateId in the dependency array
 
     useEffect(() => {
-        if (isOpen && estateId) {
+        if (isOpen) {
             fetchContracts();
         }
-    }, [isOpen, estateId]);
+    }, [isOpen, fetchContracts]); // Add fetchContracts to the dependency array
 
     const handleDeleteClick = (contractId) => {
         setDeleteContractId(contractId);
@@ -49,7 +50,10 @@ const EstateContractsModal = ({ isOpen, onClose, estateId }) => {
         
         setIsDeleting(true);
         try {
-            const response = await fetch(`http://localhost:8081/contracts/${deleteContractId}`, {
+            // Properly encode the contract number for URL safety
+            const encodedContractNumber = encodeURIComponent(deleteContractId);
+            
+            const response = await fetch(`http://localhost:8081/contracts/${encodedContractNumber}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
@@ -74,7 +78,7 @@ const EstateContractsModal = ({ isOpen, onClose, estateId }) => {
             onRequestClose={onClose}
             contentLabel="Estate Contracts"
             className="modal-content contract-details-modal"
-            ariaHideApp={false} // Add this to prevent the NotFoundError
+            ariaHideApp={false}
         >
             <h2 className="modal-title">Estate Contracts</h2>
             {error && <div className="error-message">{error}</div>}
@@ -85,7 +89,7 @@ const EstateContractsModal = ({ isOpen, onClose, estateId }) => {
                     <div className="confirmation-buttons">
                         <button 
                             onClick={confirmDeleteContract} 
-                            className="confirm-delete-btn"
+                            className="delete-btn"
                             disabled={isDeleting}
                         >
                             {isDeleting ? 'Deleting...' : 'Confirm Delete'}
@@ -115,7 +119,7 @@ const EstateContractsModal = ({ isOpen, onClose, estateId }) => {
                                     <span className="contract-duration">{contract.rent} months</span>
                                     <button 
                                         onClick={() => handleDeleteClick(contract.contract_number)}
-                                        className="delete-contract-btn"
+                                        className="delete-btn"
                                     >
                                         Delete
                                     </button>

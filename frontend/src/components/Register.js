@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from "./Header";
 import { Link } from "react-router-dom";
+import Popup from './Popup';
+import '../styles/popup.css';
 
 export default function Register() {
     const [formData, setFormData] = useState({
@@ -13,6 +15,8 @@ export default function Register() {
         confirmPassword: ''
     });
     const [error, setError] = useState('');
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState('');
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -65,11 +69,11 @@ export default function Register() {
             });
 
             const data = await response.json();
-            console.log('Registration response:', data); // Debug log
+            console.log('Registration response:', data);
 
             if (response.ok) {
-                alert('Registration successful!');
-                navigate('/login');
+                setPopupMessage('Rejestracja zakończona sukcesem! Możesz się teraz zalogować.');
+                setShowPopup(true);
             } else {
                 setError(data.message || 'Registration failed');
             }
@@ -77,6 +81,11 @@ export default function Register() {
             console.error('Registration error:', err);
             setError('Network error. Please try again.');
         }
+    };
+
+    const handleConfirmPopup = () => {
+        setShowPopup(false);
+        navigate('/login');
     };
 
     return (
@@ -152,6 +161,16 @@ export default function Register() {
                     </p>
                 </form>
             </div>
+
+            <Popup 
+                isOpen={showPopup}
+                title="Rejestracja udana"
+                message={popupMessage}
+                onConfirm={handleConfirmPopup}
+                onCancel={() => setShowPopup(false)}
+                confirmLabel="Przejdź do logowania"
+                cancelLabel="Zamknij"
+            />
         </div>
     );
 }
