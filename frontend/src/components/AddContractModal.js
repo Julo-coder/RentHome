@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import '../styles/modal.css';
 
-
-
 const AddContractModal = ({ isOpen, onClose, onUpdate, userId }) => {
     const [estates, setEstates] = useState([]);
     const [tenants, setTenants] = useState([]);
@@ -13,7 +11,8 @@ const AddContractModal = ({ isOpen, onClose, onUpdate, userId }) => {
         tenant_id: '',
         rental_price: '',
         charges: '',
-        rent: ''
+        rent: '',
+        people_count: ''
     });
     const [error, setError] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -103,7 +102,8 @@ const AddContractModal = ({ isOpen, onClose, onUpdate, userId }) => {
                 tenant_id: '',
                 rental_price: '',
                 charges: '',
-                rent: ''
+                rent: '',
+                people_count: '1'
             });
 
             if (onUpdate) {
@@ -168,6 +168,17 @@ const AddContractModal = ({ isOpen, onClose, onUpdate, userId }) => {
                         </option>
                     ))}
                 </select>
+
+                <input
+                    type="number"
+                    name="people_count"
+                    value={formData.people_count}
+                    placeholder="Number of People"
+                    onChange={handleChange}
+                    className="modal-input"
+                    min="1"
+                    required
+                />
 
                 <input
                     type="number"

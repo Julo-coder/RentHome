@@ -157,6 +157,7 @@ const EstateContractsModal = ({ isOpen, onClose, estateId }) => {
                                 <p><strong>Phone:</strong> {contract.phone}</p>
                                 <p><strong>Rental Price:</strong> {contract.rental_price} zł</p>
                                 <p><strong>Charges:</strong> {contract.charges} zł</p>
+                                <p><strong>Number of People:</strong> {contract.people_count || 1}</p>
                                 <p className="contract-remaining-time">
                                     <strong>Time Remaining:</strong> {calculateRemainingTime(contract.start_date, contract.rent)}
                                 </p>

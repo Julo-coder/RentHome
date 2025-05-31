@@ -6,7 +6,6 @@ const EditEstateModal = ({ isOpen, onClose, estateId, onUpdate }) => {
         address: '',
         city: '',
         postal_code: '',
-        people: '',
         max_person: '',
         area: ''
     });
@@ -143,7 +142,6 @@ const EditEstateModal = ({ isOpen, onClose, estateId, onUpdate }) => {
                     maxLength="6" 
                     required 
                 />
-                <input type="number" name="people" value={formData.people} onChange={handleChange} className="modal-input" required />
                 <input type="number" name="max_person" value={formData.max_person} onChange={handleChange} className="modal-input" required />
                 <input type="number" name="area" value={formData.area} onChange={handleChange} className="modal-input" required />
                 <div className="modal-buttons">

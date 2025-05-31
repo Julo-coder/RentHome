@@ -7,16 +7,17 @@ INSERT INTO tenants (name, surname, phone) VALUES
     ('Piotr', 'Wiśniewski', '555-345-678');
 
 -- Then insert estates (now user_id=1 exists)
-INSERT INTO estates (user_id, address, city, postal_code, people, max_person, area) VALUES 
-    (1, 'ul. Długa 1', 'Poznań', '61-123', 2, 4, 65.5),
-    (1, 'ul. Krótka 2', 'Poznań', '61-234', 1, 3, 48.0),
-    (1, 'os. Kwiatowe 3', 'Poznań', '61-345', 3, 5, 82.0);
+INSERT INTO estates (user_id, address, city, postal_code, max_person, area) VALUES 
+    (1, 'ul. Długa 1', 'Poznań', '61-123', 4, 65.5),
+    (1, 'ul. Krótka 2', 'Poznań', '61-234', 3, 48.0),
+    (1, 'os. Kwiatowe 3', 'Poznań', '61-345', 5, 82.0);
 
 -- Now you can reference both estates and tenants
-INSERT INTO contracts (contract_number, estate_id, tenant_id, rental_price, rent, charges) VALUES 
-    ('202/3001/004', 1, 1, 2500.00, 12, 450.00),
-    ('202/3002/005', 1, 2, 1800.00, 12, 350.00),
-    ('201/3000/006', 1, 3, 3000.00, 12, 500.00);
+-- Zaktualizowane inserty dla tabeli contracts uwzględniające liczbę osób
+INSERT INTO contracts (contract_number, estate_id, tenant_id, rental_price, rent, charges, start_date, people_count) VALUES 
+    ('202/3001/004', 1, 1, 2500.00, 12, 450.00, '2023-05-01', 2),
+    ('202/3002/005', 1, 2, 1800.00, 12, 350.00, '2023-04-15', 1),
+    ('201/3000/006', 1, 3, 3000.00, 12, 500.00, '2023-03-20', 3);
 
 -- Other inserts can remain in the same order
 INSERT INTO estate_equipments (estate_id, estate_equipment, quantity, equipment_condition) VALUES 

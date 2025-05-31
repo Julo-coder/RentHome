@@ -25,7 +25,6 @@ CREATE TABLE IF NOT EXISTS estates (
     address VARCHAR(80) NOT NULL,
     city VARCHAR(50) NOT NULL,
     postal_code VARCHAR(10) NOT NULL,
-    people INT NOT NULL,
     max_person INT NOT NULL,
     area DECIMAL(10, 2) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
@@ -46,6 +45,7 @@ CREATE TABLE IF NOT EXISTS contracts (
     rent INT NOT NULL,
     charges DECIMAL(10, 2) NOT NULL,
     start_date DATE NOT NULL DEFAULT (CURRENT_DATE),
+    people_count INT NOT NULL DEFAULT 0,
     FOREIGN KEY (estate_id) REFERENCES estates(id),
     FOREIGN KEY (tenant_id) REFERENCES tenants(id)
 );

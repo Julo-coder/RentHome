@@ -130,18 +130,22 @@ app.post('/register', async (req, res) => {
     }
 });
 
-//pobranie danych mieszkania
+// Pobieranie danych mieszkania
 app.get('/estates', async (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ message: "Not logged in" });
     }
 
     try {
-        const [rows] = await db.promise().query(
-            'SELECT * FROM estates WHERE user_id = ? ORDER BY id DESC',
+        const [estates] = await db.promise().query(
+            'SELECT e.*, COALESCE(SUM(c.people_count), 0) as people FROM estates e ' +
+            'LEFT JOIN contracts c ON e.id = c.estate_id ' +
+            'WHERE e.user_id = ? ' +
+            'GROUP BY e.id ' +
+            'ORDER BY e.id DESC',
             [req.session.user.id]
         );
-        res.json(rows);
+        res.json(estates);
     } catch (err) {
         console.error('Database error:', err);
         res.status(500).json({ error: 'Error fetching estates' });
@@ -208,7 +212,10 @@ app.get('/estates/:id', async (req, res) => {
 
     try {
         const [rows] = await db.promise().query(
-            'SELECT * FROM estates WHERE id = ? AND user_id = ?',
+            'SELECT e.*, COALESCE(SUM(c.people_count), 0) as people FROM estates e ' +
+            'LEFT JOIN contracts c ON e.id = c.estate_id ' +
+            'WHERE e.id = ? AND e.user_id = ? ' +
+            'GROUP BY e.id',
             [req.params.id, req.session.user.id]
         );
 
@@ -234,7 +241,10 @@ app.get('/estates/edit/:id', async (req, res) => {
 
     try {
         const [rows] = await db.promise().query(
-            "SELECT * FROM estates WHERE id = ? AND user_id = ?",
+            "SELECT e.*, COALESCE(SUM(c.people_count), 0) as people FROM estates e " +
+            "LEFT JOIN contracts c ON e.id = c.estate_id " +
+            "WHERE e.id = ? AND e.user_id = ? " +
+            "GROUP BY e.id",
             [estate_id, user_id]
         );
 
@@ -406,15 +416,22 @@ app.get('/user/stats/:userId', async (req, res) => {
     }
 
     try {
-        // Get total estates and average area
+        // Get total estates and occupancy statistics
         const [estatesQuery] = await db.promise().query(
             `SELECT 
-                COUNT(*) as total,
-                SUM(people) as totalTenants,
-                AVG(area) as averageArea,
-                AVG((people / max_person) * 100) as occupancyRate
-             FROM estates 
-             WHERE user_id = ?`,
+                COUNT(e.id) as total,
+                COALESCE(SUM(c.people_count), 0) as totalTenants,
+                AVG(e.area) as averageArea,
+                AVG((COALESCE(SUM_PEOPLE.total_people, 0) / e.max_person) * 100) as occupancyRate
+             FROM estates e
+             LEFT JOIN (
+                SELECT estate_id, SUM(people_count) as total_people
+                FROM contracts
+                GROUP BY estate_id
+             ) AS SUM_PEOPLE ON e.id = SUM_PEOPLE.estate_id
+             LEFT JOIN contracts c ON e.id = c.estate_id
+             WHERE e.user_id = ?
+             GROUP BY e.user_id`,
             [req.params.userId]
         );
 
@@ -447,16 +464,16 @@ app.get('/user/stats/:userId', async (req, res) => {
         // Combine and format the data
         const stats = {
             estates: {
-                total: estatesQuery[0].total || 0,
-                totalTenants: estatesQuery[0].totalTenants || 0,
-                averageArea: Math.round(estatesQuery[0].averageArea || 0),
-                occupancyRate: Math.round(estatesQuery[0].occupancyRate || 0)
+                total: estatesQuery[0]?.total || 0,
+                totalTenants: estatesQuery[0]?.totalTenants || 0,
+                averageArea: Math.round(estatesQuery[0]?.averageArea || 0),
+                occupancyRate: Math.round(estatesQuery[0]?.occupancyRate || 0)
             },
             contracts: {
-                total: contractsQuery[0].total || 0,
-                monthlyIncome: Math.round(contractsQuery[0].monthlyIncome || 0),
-                averageRent: Math.round(contractsQuery[0].averageRent || 0),
-                monthlyCharges: Math.round(contractsQuery[0].monthlyCharges || 0)
+                total: contractsQuery[0]?.total || 0,
+                monthlyIncome: Math.round(contractsQuery[0]?.monthlyIncome || 0),
+                averageRent: Math.round(contractsQuery[0]?.averageRent || 0),
+                monthlyCharges: Math.round(contractsQuery[0]?.monthlyCharges || 0)
             },
             usage: {
                 avgWater: Math.round(usageQuery[0]?.avgWater || 0),
@@ -518,7 +535,10 @@ app.post('/contracts', async (req, res) => {
         return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const { estate_id, tenant_id, rental_price, charges, rent, contract_number } = req.body;
+    const { estate_id, tenant_id, rental_price, charges, rent, contract_number, people_count } = req.body;
+    
+    // Use 1 as default if people_count is not provided
+    const tenantCount = people_count || 1;
 
     try {
         // First verify that the estate belongs to the logged-in user
@@ -541,18 +561,12 @@ app.post('/contracts', async (req, res) => {
             return res.status(400).json({ message: "Contract number already exists" });
         }
 
-        // Insert the contract with provided contract number
+        // Insert the contract with provided contract number and people count
         await db.promise().query(
             `INSERT INTO contracts 
-            (contract_number, estate_id, tenant_id, rental_price, charges, rent) 
-            VALUES (?, ?, ?, ?, ?, ?)`,
-            [contract_number, estate_id, tenant_id, rental_price, charges, rent]
-        );
-
-        // Update estate occupancy
-        await db.promise().query(
-            "UPDATE estates SET people = people + 1 WHERE id = ?",
-            [estate_id]
+            (contract_number, estate_id, tenant_id, rental_price, charges, rent, people_count) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [contract_number, estate_id, tenant_id, rental_price, charges, rent, tenantCount]
         );
 
         res.status(201).json({ 
@@ -605,6 +619,7 @@ app.get('/contracts/user/:userId', async (req, res) => {
                 c.charges,
                 c.rent,
                 c.start_date,
+                c.people_count,
                 e.address,
                 t.name as tenant_name,
                 t.surname as tenant_surname,
@@ -646,34 +661,13 @@ app.delete('/contracts/:contractNumber', async (req, res) => {
             return res.status(404).json({ message: "Contract not found or you don't have permission" });
         }
         
-        // Get the estate_id to update the people count
-        const estate_id = contractCheck[0].estate_id;
-        
-        // Begin transaction
-        const connection = await db.promise().getConnection();
-        await connection.beginTransaction();
-        
-        try {
-            // Delete the contract
-            await connection.query(
-                'DELETE FROM contracts WHERE contract_number = ?',
-                [contractNumber]
-            );
+        // Delete the contract
+        await db.promise().query(
+            'DELETE FROM contracts WHERE contract_number = ?',
+            [contractNumber]
+        );
             
-            // Update the estate's occupancy (decrease people count)
-            await connection.query(
-                'UPDATE estates SET people = GREATEST(people - 1, 0) WHERE id = ?',
-                [estate_id]
-            );
-            
-            await connection.commit();
-            res.json({ message: "Contract deleted successfully" });
-        } catch (err) {
-            await connection.rollback();
-            throw err;
-        } finally {
-            connection.release();
-        }
+        res.json({ message: "Contract deleted successfully" });
     } catch (err) {
         console.error('Error deleting contract:', err);
         res.status(500).json({ message: "Error deleting contract" });

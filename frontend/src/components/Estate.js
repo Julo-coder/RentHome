@@ -88,8 +88,7 @@ export default function Estate() {
                 body: JSON.stringify({
                     ...formData,
                     max_person: parseInt(formData.max_person),
-                    people: parseInt(formData.people),
-                    area: parseInt(formData.area)
+                    area: parseFloat(formData.area)
                 })
             });
 
@@ -104,6 +103,13 @@ export default function Estate() {
             console.error('Error adding estate:', error);
         }
     };
+    
+    // Calculate occupancy percentage
+    const calculateOccupancy = (people, maxPerson) => {
+        if (!maxPerson || maxPerson === 0) return 0;
+        const percentage = (people / maxPerson) * 100;
+        return Math.round(percentage);
+    };
 
     if (loading) {
         return <div className='loading-div'>Loading...</div>;
@@ -111,8 +117,7 @@ export default function Estate() {
 
     const estateNav = [
         { label: "Dashboard", to: "/estate" },
-        { label: "Profile", to: `/profile/${user?.id}` }, // Updated profile link
-        { label: "Settings", to: "/settings" },
+        { label: "Profile", to: `/profile/${user?.id}` },
         { label: "Add estate", to: "#", onClick: () => setIsModalOpen(true) },
         { label: "Logout", to: "#", onClick: handleLogout }
     ];
@@ -143,7 +148,7 @@ export default function Estate() {
                         <div key={estate.id} className="estate-card">
                             <div className="estate-header">
                                 <h3>Estate #{estate.id}</h3>
-                                <span className="occupancy">
+                                <span className={`occupancy ${calculateOccupancy(estate.people, estate.max_person) > 80 ? 'high' : calculateOccupancy(estate.people, estate.max_person) > 50 ? 'medium' : 'low'}`}>
                                     {estate.people}/{estate.max_person} people
                                 </span>
                             </div>
@@ -151,7 +156,12 @@ export default function Estate() {
                                 <p><strong>Address:</strong> {estate.address}</p>
                                 <p><strong>City:</strong> {estate.city}</p>
                                 <p><strong>Area:</strong> {estate.area} m²</p>
-                                <p><strong>Occupancy:</strong> {estate.people} out of {estate.max_person}</p>
+                                <p>
+                                    <strong>Occupancy:</strong> {estate.people} out of {estate.max_person} 
+                                    <span className="occupancy-percentage"> 
+                                        ({calculateOccupancy(estate.people, estate.max_person)}%)
+                                    </span>
+                                </p>
                             </div>
                             <button 
                                 onClick={() => navigate(`/estate-details/${estate.id}`)}

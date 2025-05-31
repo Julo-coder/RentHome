@@ -8,7 +8,6 @@ const AddEstateModal = ({ isOpen, onClose, onSubmit }) => {
         address: '',
         city: '',
         postal_code: '',
-        people: '',
         max_person: '',
         area: ''
     });
@@ -34,7 +33,6 @@ const AddEstateModal = ({ isOpen, onClose, onSubmit }) => {
             address: '',
             city: '',
             postal_code: '',
-            people: '',
             max_person: '',
             area: ''
         });
@@ -76,16 +74,6 @@ const AddEstateModal = ({ isOpen, onClose, onSubmit }) => {
                     className="modal-input"
                     pattern="[0-9]{2}-[0-9]{3}"
                     maxLength="6"
-                    required
-                />
-
-                <input
-                    type="number"
-                    name="people"
-                    value={formData.people}
-                    placeholder="Current people"
-                    onChange={handleChange}
-                    className="modal-input"
                     required
                 />
                 <input
