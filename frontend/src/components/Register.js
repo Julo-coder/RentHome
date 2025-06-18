@@ -29,17 +29,17 @@ export default function Register() {
     const validateForm = () => {
         if (!formData.name || !formData.surname || !formData.phone || 
             !formData.email || !formData.password || !formData.confirmPassword) {
-            setError('Wszystkie pola są wymagane');
+            setError('All fields are required');
             return false;
         }
         
         if (formData.password.length < 6) {
-            setError('Hasło musi mieć co najmniej 6 znaków');
+            setError('Password must be at least 6 characters');
             return false;
         }
         
         if (formData.password !== formData.confirmPassword) {
-            setError('Hasła nie pasują do siebie');
+            setError('Passwords do not match');
             return false;
         }
         
@@ -72,7 +72,7 @@ export default function Register() {
             console.log('Registration response:', data);
 
             if (response.ok) {
-                setPopupMessage('Rejestracja zakończona sukcesem! Możesz się teraz zalogować.');
+                setPopupMessage('Registration successful! You can now log in.');
                 setShowPopup(true);
             } else {
                 setError(data.message || 'Registration failed');
@@ -92,10 +92,10 @@ export default function Register() {
         <div className="register-section">
             <Header />
             <div className="register-container">
-                <h1 className="register-title">Rejestracja</h1>
+                <h1 className="register-title">Register</h1>
                 {error && <p className="error-message">{error}</p>}
                 <form className="register-form" onSubmit={handleSubmit}>
-                    <label htmlFor="name" className="register-label">Imię:</label>
+                    <label htmlFor="name" className="register-label">First Name:</label>
                     <input 
                         type="text" 
                         id="name" 
@@ -105,7 +105,7 @@ export default function Register() {
                         onChange={handleChange}
                         required 
                     />
-                    <label htmlFor="surname" className="register-label">Nazwisko:</label>
+                    <label htmlFor="surname" className="register-label">Last Name:</label>
                     <input 
                         type="text" 
                         id="surname" 
@@ -115,7 +115,7 @@ export default function Register() {
                         onChange={handleChange}
                         required 
                     />
-                    <label htmlFor="phone" className="register-label">Numer telefonu:</label>
+                    <label htmlFor="phone" className="register-label">Phone number:</label>
                     <input 
                         type="tel" 
                         id="phone" 
@@ -135,7 +135,7 @@ export default function Register() {
                         onChange={handleChange}
                         required 
                     />
-                    <label htmlFor="password" className="register-label">Hasło:</label>
+                    <label htmlFor="password" className="register-label">Password:</label>
                     <input 
                         type="password" 
                         id="password" 
@@ -145,7 +145,7 @@ export default function Register() {
                         onChange={handleChange}
                         required 
                     />
-                    <label htmlFor="confirmPassword" className="register-label">Potwierdź hasło:</label>
+                    <label htmlFor="confirmPassword" className="register-label">Confirm password:</label>
                     <input 
                         type="password" 
                         id="confirmPassword" 
@@ -155,21 +155,21 @@ export default function Register() {
                         onChange={handleChange}
                         required 
                     />
-                    <button type="submit" className="register-button">Zarejestruj</button>
+                    <button type="submit" className="register-button">Register</button>
                     <p className="register-text">
-                        Masz już konto? <Link to="/login" className="register-link">Zaloguj się</Link>
+                        Already have an account? <Link to="/login" className="register-link">Log in</Link>
                     </p>
                 </form>
             </div>
 
             <Popup 
                 isOpen={showPopup}
-                title="Rejestracja udana"
+                title="Registration successful"
                 message={popupMessage}
                 onConfirm={handleConfirmPopup}
                 onCancel={() => setShowPopup(false)}
-                confirmLabel="Przejdź do logowania"
-                cancelLabel="Zamknij"
+                confirmLabel="Go to login"
+                cancelLabel="Close"
             />
         </div>
     );

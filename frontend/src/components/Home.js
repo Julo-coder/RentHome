@@ -4,10 +4,10 @@ export default function Home() {
     return (
         <div className="center-content">
             <h1>RentHome</h1>
-            <p>Automatyzuj i kontroluj swój wynajem!</p>
+            <p>Automate and control your rental!</p>
             <div>
-                <Link to="/login" className="btn">Logowanie</Link>
-                <Link to="/register" className="btn">Rejestracja</Link>
+                <Link to="/login" className="btn">Login</Link>
+                <Link to="/register" className="btn">Register</Link>
             </div>
         </div>
     );

@@ -7,8 +7,8 @@ export default function Header({ navItems }) {
     
     const defaultNav = [
         { label: "Home", to: "/" },
-        { label: "Rejestracja", to: "/register" },
-        { label: "Logowanie", to: "/login" },
+        { label: "Register", to: "/register" },
+        { label: "Login", to: "/login" },
     ];
 
     return (

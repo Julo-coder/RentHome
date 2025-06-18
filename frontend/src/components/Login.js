@@ -7,7 +7,6 @@ export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [user, setUser] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -16,8 +15,6 @@ export default function Login() {
             navigate('/login');
         } else {
             try {
-                const user = JSON.parse(userData);
-                setUser(user);
             } catch (error) {
                 console.error('Error parsing user data:', error);
                 localStorage.removeItem('user');
@@ -34,12 +31,12 @@ export default function Login() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                credentials: 'include', // Add this line
+                credentials: 'include',
                 body: JSON.stringify({ email, password }),
             });
 
             const data = await response.json();
-            console.log('Login response:', data); // Debug log
+            console.log('Login response:', data);
 
             if (response.ok) {
                 localStorage.setItem('user', JSON.stringify(data.user));
@@ -48,7 +45,7 @@ export default function Login() {
                 setError(data.message || 'Login failed. Please check your credentials.');
             }
         } catch (err) {
-            console.error('Login error:', err); // Debug log
+            console.error('Login error:', err);
             if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
                 setError('Unable to connect to server. Please check your connection.');
             } else {
@@ -61,7 +58,7 @@ export default function Login() {
         <div className="login-setction">
             <Header/>
             <div className="login-container">
-                <h1 className="login-title">Logowanie</h1>
+                <h1 className="login-title">Login</h1>
                 {error && <p className="error-message">{error}</p>}
                 <form className="login-form" onSubmit={handleSubmit}>
                     <label htmlFor="email" className="login-label">Email:</label>
@@ -73,7 +70,7 @@ export default function Login() {
                         className="login-input" 
                         required 
                     />
-                    <label htmlFor="password" className="login-label">Hasło:</label>
+                    <label htmlFor="password" className="login-label">Password:</label>
                     <input 
                         type="password" 
                         id="password" 
@@ -82,12 +79,12 @@ export default function Login() {
                         className="login-input" 
                         required 
                     />
-                    <button type="submit" className="login-button">Zaloguj</button>
+                    <button type="submit" className="login-button">Log in</button>
                     <p className="login-text">
-                        Nie masz konta? <Link to="/register" className="login-link">Zarejestruj się</Link>
+                        Don't have an account? <Link to="/register" className="login-link">Register</Link>
                     </p>
                     <p className="login-text">
-                        Zapomniałeś hasła? <Link to="/reset" className="login-link">Resetuj hasło</Link>
+                        Forgot your password? <Link to="/reset" className="login-link">Reset password</Link>
                     </p>
                 </form>
             </div>
