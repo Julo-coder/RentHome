@@ -169,4 +169,4 @@ Projekt udostępniany na licencji ISC.
 
 ---
 
-**Autor:** [Julo-coder](https://github.com/Julo-coder)
+**Autor:** [jkozlowski](https://github.com/Julo-coder) [KamilCzajczyk](https://github.com/KamilCzajczyk) [DawidRm](https://github.com/DawidRm)
