@@ -1,0 +1,42 @@
+.center-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: var(--color-primary);
+    text-align: center;
+}
+
+.center-content h1 {
+    font-size: 5rem; /* Very large title */
+    font-weight: bold;
+    color: var(--color-btn);
+    margin-bottom: 1rem;
+}
+
+.center-content p {
+    font-size: 1.5rem; /* Subtle subtitle */
+    color: var(--color-p);
+    margin-bottom: 2rem;
+}
+
+.center-content .btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    margin: 0 0.5rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--color-primary);
+    background-color: var(--color-btn);
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.center-content .btn:hover {
+    background-color: var(--color-btn-hoover);
+    transform: scale(1.05); /* Slight zoom effect on hover */
+}

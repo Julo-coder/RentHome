@@ -1,0 +1,31 @@
+.main-header {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    background-color: var(--color-header);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 10vh;
+}
+
+.main-header h1 {
+    margin: 0;
+    font-size: 3rem;
+    color: var(--color-btn);
+    padding-left: 10px;
+}
+
+.main-header h1 a {
+    text-decoration: none;
+    color: var(--color-btn);
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.main-header h1 a:hover {
+    color: var(--color-link-hoover);
+}
